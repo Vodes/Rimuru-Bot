@@ -1,20 +1,19 @@
 package pw.vodes.rimuru.verification;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.javacord.api.entity.channel.ChannelType;
-import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.reaction.ReactionAddEvent;
 import org.javacord.api.listener.message.reaction.ReactionAddListener;
 
 import pw.vodes.rimuru.Main;
-import pw.vodes.rimuru.Util;
 
 public class VerificationListener implements ReactionAddListener {
 
@@ -46,6 +45,17 @@ public class VerificationListener implements ReactionAddListener {
 								if(answer == math.getResult()) {
 									role.addUser(e.getMessageAuthor().asUser().get());
 								} else {
+									if(StringUtils.isNotBlank(Main.getConfig().general_chat)) {
+										try {
+											var embed = new EmbedBuilder().setTitle("Failed verification").setDescription("Laugh at this user")
+													.setAuthor(user)
+													.addField("Question", math.getMessage())
+													.addField("Correct Result", "" + math.getResult(), true)
+													.addField("Answer", "" + answer, true)
+													.setFooter("UserID: " + user.getIdAsString());
+											Main.getServer().getChannelById(Main.getConfig().general_chat).get().asServerTextChannel().get().sendMessage(embed);
+										} catch(Exception ex) {}
+									}
 									Main.getServer().timeoutUser(user, Duration.ofMinutes(5), "Incorrect Verification");
 								}
 								disable = true;

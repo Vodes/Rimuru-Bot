@@ -9,8 +9,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import javax.imageio.ImageIO;
-
 import org.apache.commons.lang3.StringUtils;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
@@ -142,9 +140,7 @@ public class CommandUserInfo extends Command {
 						var embed = getBaseEmbed(event, user, serv);
 						
 						String emote = arg0.getEmoji().asUnicodeEmoji().get();
-						
-						BufferedImage image = null;
-						
+												
 						if(emote.equalsIgnoreCase("\u27A1") || emote.equalsIgnoreCase("\u2B05")) {
 							if(emote.equalsIgnoreCase("\u2B05")) {
 								embed.setImage(defaultImageURL);
@@ -153,8 +149,6 @@ public class CommandUserInfo extends Command {
 							}
 							embed.setFooter("ID: " + user.getIdAsString());
 							msg.edit(embed);
-							if(image != null)
-								image.flush();
 						}
 					}
 				}).removeAfter(3, TimeUnit.MINUTES);

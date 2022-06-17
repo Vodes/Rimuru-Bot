@@ -1,12 +1,14 @@
 package pw.vodes.rimuru;
 
 import java.security.SecureRandom;
+import java.util.regex.Pattern;
 
 import org.javacord.api.entity.message.Message;
 
 public class Util {
 
 	public static SecureRandom random = new SecureRandom();
+	public static final Pattern messageSplitPattern = Pattern.compile("(?=\\S)[^\\\"\\s]*(?:\\\"[^\\\\\\\"]*(?:\\\\[\\s\\S][^\\\\\\\"]*)*\\\"[^\\\"\\s]*)*");
 
 	public static class MessageDeleteThread extends Thread {
 
