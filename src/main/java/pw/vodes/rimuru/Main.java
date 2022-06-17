@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import pw.vodes.rimuru.command.CommandManager;
+import pw.vodes.rimuru.file.AutoRoles;
 import pw.vodes.rimuru.file.FileManager;
 import pw.vodes.rimuru.verification.VerificationListener;
 
@@ -41,7 +42,7 @@ public class Main {
 		api.updateActivity(ActivityType.CUSTOM, "!help");
 		server = (Server) api.getServers().toArray()[0];
 		commandManager = new CommandManager().init();
-		
+		AutoRoles.load();				
 		try {
 			var verifyMessage = server.getChannelById(getConfig().verification_channel).get().asServerTextChannel().get().getMessageById(getConfig().verification_reaction_message).get();
 			verifyMessage.addReactionAddListener(new VerificationListener());

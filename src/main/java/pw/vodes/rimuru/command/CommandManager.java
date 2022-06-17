@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import pw.vodes.rimuru.Main;
+import pw.vodes.rimuru.command.commands.CommandAutorole;
 import pw.vodes.rimuru.command.commands.CommandClear;
 import pw.vodes.rimuru.command.commands.CommandUserInfo;
 
@@ -23,6 +24,7 @@ public class CommandManager {
 	public CommandManager init() {
 		commands.add(new CommandUserInfo());
 		commands.add(new CommandClear());
+		commands.add(new CommandAutorole());
 		
 		for(var roleid : Main.getConfig().mod_roles) {
 			modRoles.add(Main.getServer().getRoleById(roleid).get());
@@ -72,7 +74,7 @@ public class CommandManager {
 			if(!cmd.isEnabled())
 				continue;
 			for(var alias : cmd.getAlias()) {
-				if(StringUtils.startsWith(msg, Main.getConfig().command_prefix + alias) && hasPerms(cmd, event.getMessageAuthor().asUser().get())) {
+				if(StringUtils.startsWithIgnoreCase(msg, Main.getConfig().command_prefix + alias) && hasPerms(cmd, event.getMessageAuthor().asUser().get())) {
 					cmd.run(event);
 					break;
 				}

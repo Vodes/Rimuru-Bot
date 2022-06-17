@@ -56,7 +56,7 @@ public class CommandClear extends Command {
 		} else if(StringUtils.isNumeric(args.get(1))) {
 			if(event.getMessage().getMentionedUsers().isEmpty()) {
 				try {
-					messages = event.getChannel().getMessages(Integer.parseInt(args.get(1)) + 1).get().stream().toList();
+					messages = event.getChannel().getMessages(Integer.parseInt(args.get(1)) + 1).get().stream().collect(Collectors.toList());
 				} catch (NumberFormatException | InterruptedException | ExecutionException e) {
 					e.printStackTrace();
 				}
