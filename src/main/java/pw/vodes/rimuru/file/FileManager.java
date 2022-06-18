@@ -9,6 +9,13 @@ import org.apache.commons.lang3.SystemUtils;
 
 public class FileManager {
 	
+	private String configDir = null;
+	
+	public FileManager(String configDir) {
+		this.configDir = configDir;
+	} 
+	
+	
 	public String read(String name) {
 		if(exists(name)) {
 			try {
@@ -37,12 +44,18 @@ public class FileManager {
 	
 	public File getConfigDir() {
 		File file = null;
-		var homeDir = new File(System.getProperty("user.home"));
-		if(SystemUtils.IS_OS_LINUX) {
-			file = new File(homeDir, ".config" + File.separator + "Rimuru");
+		
+		if(configDir != null) {
+			file = new File(configDir);
 		} else {
-			file = new File(homeDir, "AppData" + File.separator + "Roaming" + File.separator + "Rimuru");
+			var homeDir = new File(System.getProperty("user.home"));
+			if(SystemUtils.IS_OS_LINUX) {
+				file = new File(homeDir, ".config" + File.separator + "Rimuru");
+			} else {
+				file = new File(homeDir, "AppData" + File.separator + "Roaming" + File.separator + "Rimuru");
+			}
 		}
+
 		if(!file.exists()) {
 			file.mkdirs();
 		}

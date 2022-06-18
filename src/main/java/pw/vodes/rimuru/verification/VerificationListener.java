@@ -1,6 +1,7 @@
 package pw.vodes.rimuru.verification;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.javacord.api.entity.channel.ChannelType;
+import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.reaction.ReactionAddEvent;
@@ -28,14 +30,8 @@ public class VerificationListener implements ReactionAddListener {
 				try {
 					var thread = event.getChannel().asServerTextChannel().get().createThread(ChannelType.SERVER_PUBLIC_THREAD, user.getDiscriminatedName(), 60, true).get();
 					var msg = thread.sendMessage(user.getMentionTag() + " " + math.getMessage()).get();
-					try {
-						var msgs = event.getChannel().getMessages(10).get().stream().filter(o -> o.getAuthor().isYourself()).collect(Collectors.toList());
-						if(!msgs.isEmpty()) {
-							event.getServerTextChannel().get().bulkDelete(msgs);
-						}
-					} catch (InterruptedException | ExecutionException e3) {
-						e3.printStackTrace();
-					}
+					deleteMessages(event);
+
 					AtomicBoolean threadIsGone = new AtomicBoolean(false);
 					thread.addMessageCreateListener(e -> {
 						var disable = false;
@@ -84,14 +80,7 @@ public class VerificationListener implements ReactionAddListener {
 						} catch (InterruptedException e1) {
 							e1.printStackTrace();
 						}
-						try {
-							var msgs = event.getChannel().getMessages(10).get().stream().filter(o -> o.getAuthor().isYourself()).collect(Collectors.toList());
-							if(!msgs.isEmpty()) {
-								event.getServerTextChannel().get().bulkDelete(msgs);
-							}
-						} catch (InterruptedException | ExecutionException e3) {
-							e3.printStackTrace();
-						}
+						deleteMessages(event);
 						try {
 							if(!threadIsGone.get())
 								Main.getServer().getThreadChannelById(thread.getId()).get().delete();
@@ -103,6 +92,21 @@ public class VerificationListener implements ReactionAddListener {
 			}
 		} catch (InterruptedException | ExecutionException e1) {
 			e1.printStackTrace();
+		}
+	}
+	
+	private void deleteMessages(ReactionAddEvent event) {
+		List<Message> msgs;
+		try {
+			msgs = event.getChannel().getMessages(10).get().stream().filter(o -> o.getAuthor().isYourself()).collect(Collectors.toList());
+			if(!msgs.isEmpty()) {
+				if(msgs.size() < 2)
+					msgs.get(0).delete();
+				else
+					event.getServerTextChannel().get().bulkDelete(msgs);
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
 		}
 	}
 

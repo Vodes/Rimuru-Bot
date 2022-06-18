@@ -1,7 +1,5 @@
 package pw.vodes.rimuru.file.sub;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class AutoModFile {
 	
 	public String filteredSequence;

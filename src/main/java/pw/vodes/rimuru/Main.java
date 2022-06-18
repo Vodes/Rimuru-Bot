@@ -23,7 +23,7 @@ import pw.vodes.rimuru.verification.VerificationListener;
 public class Main {
 	
 	public static DiscordApi api;
-	private static FileManager fileManager = new FileManager();
+	private static FileManager fileManager;
 	private static Config config;
 	private static ObjectMapper mapper = new ObjectMapper();
 	private static CommandManager commandManager;
@@ -33,6 +33,7 @@ public class Main {
 	private static TextChannel logChannel, staffActionChannel;
 	
 	public static void main(String[] args) {
+		fileManager = new FileManager(args.length > 0 ? args[0] : null);
 		try {
 			config = mapper.readValue(fileManager.read("config.json"), Config.class);
 		} catch (JsonProcessingException e) {
@@ -46,7 +47,7 @@ public class Main {
 				.setToken(config.bot_token)
 				.setAllIntents()
 				.login().join();
-		api.updateActivity(ActivityType.CUSTOM, "!help");
+		api.updateActivity(ActivityType.PLAYING, "!help");
 		server = (Server) api.getServers().toArray()[0];
 		commandManager = new CommandManager().init();
 		AutoRoles.load();
@@ -92,8 +93,16 @@ public class Main {
 		});
 	}
 	
+	public static String getVersion() {
+		return "0.0.2";
+	}
+	
 	public static FileManager getFiles() {
 		return fileManager;
+	}
+	
+	public static CommandManager getCommandManager() {
+		return commandManager;
 	}
 	
 	public static Config getConfig() {

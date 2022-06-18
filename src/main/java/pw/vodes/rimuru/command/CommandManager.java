@@ -9,14 +9,15 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import pw.vodes.rimuru.Main;
 import pw.vodes.rimuru.command.commands.CommandAutomod;
 import pw.vodes.rimuru.command.commands.CommandAutorole;
 import pw.vodes.rimuru.command.commands.CommandBan;
 import pw.vodes.rimuru.command.commands.CommandClear;
+import pw.vodes.rimuru.command.commands.CommandHelp;
 import pw.vodes.rimuru.command.commands.CommandKick;
+import pw.vodes.rimuru.command.commands.CommandStealEmote;
 import pw.vodes.rimuru.command.commands.CommandUserInfo;
 
 public class CommandManager {
@@ -31,6 +32,8 @@ public class CommandManager {
 		commands.add(new CommandAutomod());
 		commands.add(new CommandBan());
 		commands.add(new CommandKick());
+		commands.add(new CommandStealEmote());
+		commands.add(new CommandHelp());
 		
 		for(var roleid : Main.getConfig().mod_roles) {
 			modRoles.add(Main.getServer().getRoleById(roleid).get());
@@ -86,6 +89,10 @@ public class CommandManager {
 				}
 			}
 		}
+	}
+	
+	public ArrayList<Command> getCommands() {
+		return commands;
 	}
 	
 	private boolean hasPerms(Command cmd, User user) {

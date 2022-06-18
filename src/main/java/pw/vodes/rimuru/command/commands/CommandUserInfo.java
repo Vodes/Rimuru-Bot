@@ -1,6 +1,5 @@
 package pw.vodes.rimuru.command.commands;
 
-import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
