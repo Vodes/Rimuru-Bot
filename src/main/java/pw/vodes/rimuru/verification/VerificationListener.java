@@ -41,7 +41,20 @@ public class VerificationListener implements ReactionAddListener {
 						var disable = false;
 						if(e.getMessageAuthor().getId() == user.getId() && !disable) {
 							try {
-								var answer = Double.parseDouble(e.getMessageContent());
+								var answer = 0D;
+								try {
+									answer = Double.parseDouble(e.getMessageContent());
+								} catch (Exception e2) {
+									try {
+										var embed = new EmbedBuilder().setTitle("Thinks he is funny")
+												.setAuthor(user)
+												.addField("Question", math.getMessage())
+												.addField("Correct Result", "" + math.getResult(), true)
+												.addField("Answer", "" + answer, true)
+												.setFooter("UserID: " + user.getIdAsString());
+										Main.getServer().getChannelById(Main.getConfig().general_chat).get().asServerTextChannel().get().sendMessage(embed);
+									} catch(Exception ex) {}
+								}
 								if(answer == math.getResult()) {
 									role.addUser(e.getMessageAuthor().asUser().get());
 								} else {

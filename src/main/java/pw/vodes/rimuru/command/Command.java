@@ -68,5 +68,9 @@ public abstract class Command {
 		}
 		return list;
 	}
+	
+	public void log(String title, String message) {
+		
+	}
 
 }

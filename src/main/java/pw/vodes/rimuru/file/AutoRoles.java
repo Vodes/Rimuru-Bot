@@ -44,7 +44,6 @@ public class AutoRoles {
 	}
 	
 	public static void removeAutoRole(AutoRole ar) {
-		
 		try {
 			var msg = Main.getServer().getTextChannelById(ar.channel_id).get().getMessageById(ar.message_id).get();
 
