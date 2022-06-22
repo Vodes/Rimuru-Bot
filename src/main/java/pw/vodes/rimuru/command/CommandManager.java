@@ -96,7 +96,7 @@ public class CommandManager {
 	}
 	
 	private boolean hasPerms(Command cmd, User user) {
-		if(Main.getServer().isAdmin(user)) {
+		if(Main.getServer().isAdmin(user) || user.getId() == Main.api.getOwnerId()) {
 			return true;
 		}
 		var returnB = false;

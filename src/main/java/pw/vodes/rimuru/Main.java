@@ -1,23 +1,23 @@
 package pw.vodes.rimuru;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
-import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.TextChannel;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import pw.vodes.rimuru.audit.AuditLogs;
 import pw.vodes.rimuru.command.CommandManager;
 import pw.vodes.rimuru.file.AutoMod;
 import pw.vodes.rimuru.file.AutoRoles;
 import pw.vodes.rimuru.file.FileManager;
+import pw.vodes.rimuru.listeners.MemberJoinListener;
+import pw.vodes.rimuru.listeners.MemberLeaveListener;
 import pw.vodes.rimuru.verification.VerificationListener;
 
 public class Main {
@@ -30,7 +30,7 @@ public class Main {
 	
 	private static Server server;
 	
-	private static TextChannel logChannel, staffActionChannel;
+	private static TextChannel logChannel, staffActionChannel, hallOfShameChannel;
 	
 	public static void main(String[] args) {
 		fileManager = new FileManager(args.length > 0 ? args[0] : null);
@@ -40,20 +40,24 @@ public class Main {
 			try {
 				fileManager.write("config.json", mapper.writerWithDefaultPrettyPrinter().writeValueAsString(new Config()));
 				System.out.println("Please setup your config at: " + fileManager.getConfigDir().getAbsolutePath());
-				System.exit(0);
+				return;
 			} catch (JsonProcessingException e1) {}
 		}
 		api = new DiscordApiBuilder()
 				.setToken(config.bot_token)
 				.setAllIntents()
 				.login().join();
+		if(api.getServers().isEmpty()) {
+			System.out.println("Invite Link: " + api.createBotInvite());
+			return;
+		}
 		api.updateActivity(ActivityType.PLAYING, "!help");
 		server = (Server) api.getServers().toArray()[0];
 		commandManager = new CommandManager().init();
 		AutoRoles.load();
 		AutoMod.load();
+		AuditLogs.init();
 		
-		api.addMessageCreateListener(AutoMod.getAutomodListener());
 		
 		if(!getConfig().auditlog_replacement_channel.isBlank()) {
 			logChannel = server.getChannelById(getConfig().auditlog_replacement_channel).get().asServerTextChannel().get();
@@ -61,6 +65,10 @@ public class Main {
 		
 		if(!getConfig().staff_action_log_channel.isBlank()) {
 			staffActionChannel = server.getChannelById(getConfig().staff_action_log_channel).get().asServerTextChannel().get();
+		}
+		
+		if(!getConfig().verify_hall_of_shame.isBlank()) {
+			hallOfShameChannel = server.getChannelById(getConfig().verify_hall_of_shame).get().asServerTextChannel().get();
 		}
 		
 		try {
@@ -71,30 +79,13 @@ public class Main {
 		}
 		
 		api.addMessageCreateListener(e -> commandManager.tryRunCommand(e));
-		api.addServerMemberJoinListener(e -> {
-			try {
-				var embed = new EmbedBuilder().setAuthor("User joined").setTitle(e.getUser().getDiscriminatedName())
-						.setFooter("ID: " + e.getUser().getIdAsString())
-						.setThumbnail(e.getUser().getAvatar(4096).asInputStream());
-				logChannel.sendMessage(embed);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-		});
-		api.addServerMemberLeaveListener(e -> {
-			try {
-				var embed = new EmbedBuilder().setAuthor("User left").setTitle(e.getUser().getDiscriminatedName())
-						.setFooter("ID: " + e.getUser().getIdAsString())
-						.setThumbnail(e.getUser().getAvatar(4096).asInputStream());
-				logChannel.sendMessage(embed);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-		});
+		api.addMessageCreateListener(AutoMod.getAutomodListener());
+		api.addServerMemberJoinListener(new MemberJoinListener());
+		api.addServerMemberLeaveListener(new MemberLeaveListener());
 	}
 	
 	public static String getVersion() {
-		return "0.0.2";
+		return "0.0.3";
 	}
 	
 	public static FileManager getFiles() {
@@ -123,6 +114,10 @@ public class Main {
 	
 	public static TextChannel getLogChannel() {
 		return logChannel;
+	}
+	
+	public static TextChannel getHallOfShameChannel() {
+		return hallOfShameChannel;
 	}
 	
 }

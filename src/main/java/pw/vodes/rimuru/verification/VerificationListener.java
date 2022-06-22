@@ -19,6 +19,8 @@ import pw.vodes.rimuru.Main;
 
 public class VerificationListener implements ReactionAddListener {
 
+	// This could and should get a rewrite
+	
 	@Override
 	public void onReactionAdd(ReactionAddEvent event) {
 		var role = Main.getServer().getRoleById(Main.getConfig().verification_role).get();
@@ -46,9 +48,13 @@ public class VerificationListener implements ReactionAddListener {
 												.setAuthor(user)
 												.addField("Question", math.getMessage())
 												.addField("Correct Result", "" + math.getResult(), true)
-												.addField("Answer", "" + answer, true)
+												.addField("Answer", "" + e.getMessageContent(), true)
 												.setFooter("UserID: " + user.getIdAsString());
-										Main.getServer().getChannelById(Main.getConfig().general_chat).get().asServerTextChannel().get().sendMessage(embed);
+										if(Main.getHallOfShameChannel() != null)
+											Main.getHallOfShameChannel().sendMessage(embed);
+										else
+											Main.getServer().getChannelById(Main.getConfig().general_chat).get().asServerTextChannel().get().sendMessage(embed);
+										return;
 									} catch(Exception ex) {}
 								}
 								if(answer == math.getResult()) {
@@ -62,7 +68,10 @@ public class VerificationListener implements ReactionAddListener {
 													.addField("Correct Result", "" + math.getResult(), true)
 													.addField("Answer", "" + answer, true)
 													.setFooter("UserID: " + user.getIdAsString());
-											Main.getServer().getChannelById(Main.getConfig().general_chat).get().asServerTextChannel().get().sendMessage(embed);
+											if(Main.getHallOfShameChannel() != null)
+												Main.getHallOfShameChannel().sendMessage(embed);
+											else
+												Main.getServer().getChannelById(Main.getConfig().general_chat).get().asServerTextChannel().get().sendMessage(embed);
 										} catch(Exception ex) {}
 									}
 									Main.getServer().timeoutUser(user, Duration.ofMinutes(5), "Incorrect Verification");
