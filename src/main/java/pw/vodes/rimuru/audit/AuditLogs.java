@@ -83,51 +83,55 @@ public class AuditLogs {
 		
 		new Thread(() -> {
 			while(true) {
+				check();
 				try {
-					var logs = Main.getServer().getAuditLog(20).get().getEntries();
-					for(var log : logs) {
-						if(log.getCreationTimestamp().isBefore(Instant.now().minusSeconds(3))) {
-							continue;
-						}
-						switch (log.getType()) {
-						case MEMBER_BAN_ADD: {
-							registerStaffAction(new CommandStaffAction(Instant.now().getEpochSecond()
-							, log.getTarget().get().asUser().get().getIdAsString()
-							, log.getUser().get().getIdAsString()
-							, log.getReason().isPresent() ? log.getReason().get() : ""
-							, StaffActionType.ban));
-							break;
-						}
-						case MEMBER_BAN_REMOVE: {
-							registerStaffAction(new CommandStaffAction(Instant.now().getEpochSecond()
-							, log.getTarget().get().asUser().get().getIdAsString()
-							, log.getUser().get().getIdAsString()
-							, log.getReason().isPresent() ? log.getReason().get() : ""
-							, StaffActionType.unban));
-							break;
-						}
-						case MEMBER_KICK: {
-							registerStaffAction(new CommandStaffAction(Instant.now().getEpochSecond()
-							, log.getTarget().get().asUser().get().getIdAsString()
-							, log.getUser().get().getIdAsString()
-							, log.getReason().isPresent() ? log.getReason().get() : ""
-							, StaffActionType.kick));
-							break;
-						}
-						default:
-							break;
-						}
-					}
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-				try {
-					Thread.sleep(1000);
+					Thread.sleep(1750);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
 		}).start();
+	}
+	
+	public static void check() {
+		try {
+			var logs = Main.getServer().getAuditLog(20).get().getEntries();
+			for(var log : logs) {
+				if(log.getCreationTimestamp().isBefore(Instant.now().minusSeconds(3))) {
+					continue;
+				}
+				switch (log.getType()) {
+				case MEMBER_BAN_ADD: {
+					registerStaffAction(new CommandStaffAction(Instant.now().getEpochSecond()
+					, log.getTarget().get().asUser().get().getIdAsString()
+					, log.getUser().get().getIdAsString()
+					, log.getReason().isPresent() ? log.getReason().get() : ""
+					, StaffActionType.ban));
+					break;
+				}
+				case MEMBER_BAN_REMOVE: {
+					registerStaffAction(new CommandStaffAction(Instant.now().getEpochSecond()
+					, log.getTarget().get().asUser().get().getIdAsString()
+					, log.getUser().get().getIdAsString()
+					, log.getReason().isPresent() ? log.getReason().get() : ""
+					, StaffActionType.unban));
+					break;
+				}
+				case MEMBER_KICK: {
+					registerStaffAction(new CommandStaffAction(Instant.now().getEpochSecond()
+					, log.getTarget().get().asUser().get().getIdAsString()
+					, log.getUser().get().getIdAsString()
+					, log.getReason().isPresent() ? log.getReason().get() : ""
+					, StaffActionType.kick));
+					break;
+				}
+				default:
+					break;
+				}
+			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 	}
 
 }

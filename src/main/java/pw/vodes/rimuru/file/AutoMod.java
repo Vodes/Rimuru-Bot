@@ -60,13 +60,9 @@ public class AutoMod {
 	}
 	
 	public static MessageCreateListener getAutomodListener() {
-		ArrayList<Role> modRoles = new ArrayList<Role>();
-		for(var roleid : Main.getConfig().mod_roles) {
-			modRoles.add(Main.getServer().getRoleById(roleid).get());
-		}
 		ArrayList<TextChannel> excludedChannels = new ArrayList<TextChannel>();
 		for(var channel : Main.getServer().getTextChannels()) {
-			for(var cat : Main.getConfig().automod_excluded_categories) {
+			for(var cat : Main.getConfig().getAutomodExcludedCategories()) {
 				if(channel.asCategorizable().get().getCategory().get().getName().equalsIgnoreCase(cat)) {
 					excludedChannels.add(channel);
 				}
@@ -79,7 +75,7 @@ public class AutoMod {
 			@Override
 			public void onMessageCreate(MessageCreateEvent event) {
 				var isAdminOrMod = event.getMessageAuthor().isServerAdmin();
-				for(var role : modRoles) {
+				for(var role : Main.getConfig().getModRoles()) {
 					if(role.hasUser(event.getMessageAuthor().asUser().get()))
 						isAdminOrMod = true;
 				}

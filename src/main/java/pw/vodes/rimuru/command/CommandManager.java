@@ -23,7 +23,6 @@ import pw.vodes.rimuru.command.commands.CommandUserInfo;
 public class CommandManager {
 	
 	private ArrayList<Command> commands = new ArrayList<Command>();
-	private ArrayList<Role> modRoles = new ArrayList<Role>();
 	
 	public CommandManager init() {
 		commands.add(new CommandUserInfo());
@@ -34,10 +33,6 @@ public class CommandManager {
 		commands.add(new CommandKick());
 		commands.add(new CommandStealEmote());
 		commands.add(new CommandHelp());
-		
-		for(var roleid : Main.getConfig().mod_roles) {
-			modRoles.add(Main.getServer().getRoleById(roleid).get());
-		}
 		
 		loadStatus();
 		return this;
@@ -83,7 +78,7 @@ public class CommandManager {
 			if(!cmd.isEnabled())
 				continue;
 			for(var alias : cmd.getAlias()) {
-				if(StringUtils.startsWithIgnoreCase(msg, Main.getConfig().command_prefix + alias) && hasPerms(cmd, event.getMessageAuthor().asUser().get())) {
+				if(StringUtils.startsWithIgnoreCase(msg, Main.getConfig().getCommandPrefix() + alias) && hasPerms(cmd, event.getMessageAuthor().asUser().get())) {
 					cmd.run(event);
 					break;
 				}
@@ -103,7 +98,7 @@ public class CommandManager {
 		if(cmd.getType() == CommandType.everyone) {
 			returnB = true;
 		} else if(cmd.getType() == CommandType.mod) {
-			for(var role : modRoles) {
+			for(var role : Main.getConfig().getModRoles()) {
 				if(role.hasUser(user)) {
 					returnB = true;
 				}

@@ -13,10 +13,11 @@ public class MemberLeaveListener implements ServerMemberLeaveListener {
 	public void onServerMemberLeave(ServerMemberLeaveEvent event) {
 		new Thread(() -> {
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(750);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			AuditLogs.check();
 			if(AuditLogs.userWasKickedOrBanned(event.getUser())) {
 				return;
 			}

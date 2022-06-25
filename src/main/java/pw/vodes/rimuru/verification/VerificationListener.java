@@ -18,12 +18,10 @@ import org.javacord.api.listener.message.reaction.ReactionAddListener;
 import pw.vodes.rimuru.Main;
 
 public class VerificationListener implements ReactionAddListener {
-
-	// This could and should get a rewrite
 	
 	@Override
 	public void onReactionAdd(ReactionAddEvent event) {
-		var role = Main.getServer().getRoleById(Main.getConfig().verification_role).get();
+		var role = Main.getConfig().getVerificationRole();
 		User user;
 		try {
 			user = Main.api.getUserById(event.getUserId()).get();
@@ -43,37 +41,12 @@ public class VerificationListener implements ReactionAddListener {
 								try {
 									answer = Double.parseDouble(e.getMessageContent());
 								} catch (Exception e2) {
-									try {
-										var embed = new EmbedBuilder().setTitle("Thinks he is funny")
-												.setAuthor(user)
-												.addField("Question", math.getMessage())
-												.addField("Correct Result", "" + math.getResult(), true)
-												.addField("Answer", "" + e.getMessageContent(), true)
-												.setFooter("UserID: " + user.getIdAsString());
-										if(Main.getHallOfShameChannel() != null)
-											Main.getHallOfShameChannel().sendMessage(embed);
-										else
-											Main.getServer().getChannelById(Main.getConfig().general_chat).get().asServerTextChannel().get().sendMessage(embed);
-										return;
-									} catch(Exception ex) {}
+									sendFailEmbed(user, math, "Thinks he is funny", null, e.getMessageContent());
 								}
 								if(answer == math.getResult()) {
 									role.addUser(e.getMessageAuthor().asUser().get());
 								} else {
-									if(StringUtils.isNotBlank(Main.getConfig().general_chat)) {
-										try {
-											var embed = new EmbedBuilder().setTitle("Failed verification").setDescription("Laugh at this user")
-													.setAuthor(user)
-													.addField("Question", math.getMessage())
-													.addField("Correct Result", "" + math.getResult(), true)
-													.addField("Answer", "" + answer, true)
-													.setFooter("UserID: " + user.getIdAsString());
-											if(Main.getHallOfShameChannel() != null)
-												Main.getHallOfShameChannel().sendMessage(embed);
-											else
-												Main.getServer().getChannelById(Main.getConfig().general_chat).get().asServerTextChannel().get().sendMessage(embed);
-										} catch(Exception ex) {}
-									}
+									sendFailEmbed(user, math, "Failed verification", null, "" + answer);
 									Main.getServer().timeoutUser(user, Duration.ofMinutes(5), "Incorrect Verification");
 								}
 								disable = true;
@@ -118,5 +91,24 @@ public class VerificationListener implements ReactionAddListener {
 			e.printStackTrace();
 		}
 	}
-
+	
+	private void sendFailEmbed(User user, VerificationMath math, String title, String description, String answer) {
+		var embed = new EmbedBuilder().setTitle(title)
+				.setAuthor(user)
+				.addField("Question", math.getMessage())
+				.addField("Correct Result", "" + math.getResult(), true)
+				.addField("Answer", "" + answer, true)
+				.setFooter("UserID: " + user.getIdAsString());
+		
+		if(description != null) {
+			embed.setDescription(description);
+		}
+		
+		try {
+			if(Main.getConfig().getHallOfShameChannel() != null)
+				Main.getConfig().getHallOfShameChannel().sendMessage(embed);
+			else
+				Main.getConfig().getLobbyChannel().sendMessage(embed);
+		} catch (Exception e) {}
+	}
 }

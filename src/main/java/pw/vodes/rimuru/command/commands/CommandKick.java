@@ -27,15 +27,10 @@ public class CommandKick extends Command {
 		var users = new ArrayList<User>();
 		var args = getSplitMessage(event);
 		
-		ArrayList<Role> modRoles = new ArrayList<Role>();
-		for(var roleid : Main.getConfig().mod_roles) {
-			modRoles.add(Main.getServer().getRoleById(roleid).get());
-		}
-		
 		if(!event.getMessage().getMentionedUsers().isEmpty()) {
 			for(var u : event.getMessage().getMentionedUsers()) {
 				var isAdminOrMod = Main.getServer().isAdmin(u);
-				for(var role : modRoles) {
+				for(var role : Main.getConfig().getModRoles()) {
 					if(role.hasUser(u))
 						isAdminOrMod = true;
 				}
@@ -49,7 +44,7 @@ public class CommandKick extends Command {
 				var u = Main.api.getUserById(args.get(1)).get();
 				if(Main.getServer().isMember(u)) {
 					var isAdminOrMod = Main.getServer().isAdmin(u);
-					for(var role : modRoles) {
+					for(var role : Main.getConfig().getModRoles()) {
 						if(role.hasUser(u))
 							isAdminOrMod = true;
 					}
