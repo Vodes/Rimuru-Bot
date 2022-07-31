@@ -21,6 +21,7 @@ public class ConfigAdapter {
 	private Role verificationRole;
 	private Message verificationMessage;
 	private TextChannel verificationChannel, hallOfShameChannel;
+	private boolean purgeUnverified;
 	
 	//Log
 	private TextChannel staffActionChannel, otherLogChannel;
@@ -99,6 +100,10 @@ public class ConfigAdapter {
 
 	public TextChannel getHallOfShameChannel() {
 		return hallOfShameChannel;
+	}
+	
+	public boolean shouldPurgeUnverified() {
+		return purgeUnverified;
 	}
 
 

@@ -8,10 +8,14 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.event.message.MessageCreateEvent;
+import org.javacord.api.event.message.MessageEditEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
+import org.javacord.api.listener.message.MessageEditListener;
 import org.javacord.api.listener.message.reaction.ReactionAddListener;
 import org.javacord.api.listener.message.reaction.ReactionRemoveListener;
 
@@ -25,6 +29,7 @@ import pw.vodes.rimuru.file.sub.AutoRole;
 public class AutoMod {
 	
 	private static List<AutoModFile> automods = new ArrayList<AutoModFile>();
+	private static ArrayList<TextChannel> excludedChannels = new ArrayList<TextChannel>();
 	
 	@SuppressWarnings("unchecked")
 	public static void load() {
@@ -33,6 +38,16 @@ public class AutoMod {
 				automods = (ArrayList<AutoModFile>)Main.getMapper().readValue(Main.getFiles().read("automod.json"), Main.getMapper().getTypeFactory().constructCollectionType(ArrayList.class, AutoModFile.class));
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
+			}
+		}
+		
+		for(var channel : Main.getServer().getTextChannels()) {
+			for(var cat : Main.getConfig().getAutomodExcludedCategories()) {
+				if(channel.asCategorizable().get().getCategory().isPresent()) {
+					if(channel.asCategorizable().get().getCategory().get().getName().equalsIgnoreCase(cat)) {
+						excludedChannels.add(channel);
+					}
+				}
 			}
 		}
 	}
@@ -59,69 +74,73 @@ public class AutoMod {
 		save();
 	}
 	
-	public static MessageCreateListener getAutomodListener() {
-		ArrayList<TextChannel> excludedChannels = new ArrayList<TextChannel>();
-		for(var channel : Main.getServer().getTextChannels()) {
-			for(var cat : Main.getConfig().getAutomodExcludedCategories()) {
-				if(channel.asCategorizable().get().getCategory().get().getName().equalsIgnoreCase(cat)) {
-					excludedChannels.add(channel);
-				}
-			}
-		}
-
-
+	public static MessageCreateListener getAutomodCreateListener() {
 		return new MessageCreateListener() {
-			
 			@Override
 			public void onMessageCreate(MessageCreateEvent event) {
-				var isAdminOrMod = event.getMessageAuthor().isServerAdmin();
-				for(var role : Main.getConfig().getModRoles()) {
-					if(role.hasUser(event.getMessageAuthor().asUser().get()))
-						isAdminOrMod = true;
-				}
-				
-				if(isAdminOrMod)
-					return;
-				
-				for(var chan : excludedChannels) {
-					if(event.getChannel().getId() == chan.getId()) {
-						return;
-					}
-				}
-				
-				for(var am : AutoMod.getAutomods()) {
-					try {
-						var pattern = Pattern.compile(am.filteredSequence, Pattern.CASE_INSENSITIVE);
-						if(pattern.matcher(event.getMessageContent()).find() || StringUtils.containsIgnoreCase(event.getMessageContent(), am.filteredSequence)) {
-							var embed = new EmbedBuilder().setTitle("Automod");
-							embed.setAuthor(event.getMessageAuthor());
-							embed.setUrl(event.getMessageLink().toString());
-							embed.setFooter("UserID: " + event.getMessageAuthor().getIdAsString());
-							if(am.punishment == null) {
-								embed.setDescription("Message deleted:\n```" + event.getMessageContent() + "```");
-								event.getMessage().delete();
-							} else {
-								if(am.punishment == Punishment.KICK) {
-									Main.getServer().kickUser(event.getMessageAuthor().asUser().get(), "Automod");
-									event.getMessage().delete();
-									embed.setDescription("Kicked & Message deleted:\n```" + event.getMessageContent() + "```");
-								} else if(am.punishment == Punishment.BAN) {
-									Main.getServer().banUser(event.getMessageAuthor().getId(), 0, "Automod");
-									event.getMessage().delete();
-									embed.setDescription("Banned & Message deleted:\n```" + event.getMessageContent() + "```");
-								} else {
-									Main.getServer().timeoutUser(event.getMessageAuthor().asUser().get(), Duration.ofMinutes(Long.parseLong(am.punishmentVal)), "Automod");
-									event.getMessage().delete();
-									embed.setDescription("Timeouted & Message deleted:\n```" + event.getMessageContent() + "```");
-								}
-							}
-							Main.getLogChannel().sendMessage(embed);
-							break;
-						}
-					} catch (Exception e) {}
-				}
+				checkMessage(event.getMessage(), event.getMessageAuthor(), event.getMessageContent());
 			}
 		};
+	}
+	
+	public static MessageEditListener getAutomodEditListener() {
+		return new MessageEditListener() {
+
+			@Override
+			public void onMessageEdit(MessageEditEvent event) {
+				var msg = event.getMessage().get();
+				checkMessage(msg, msg.getAuthor(), msg.getContent());				
+			}
+		};
+	}
+	
+	private static void checkMessage(Message message, MessageAuthor author, String content) {
+		var isAdminOrMod = author.isServerAdmin();
+		for(var role : Main.getConfig().getModRoles()) {
+			if(role.hasUser(author.asUser().get()))
+				isAdminOrMod = true;
+		}
+		
+		if(isAdminOrMod)
+			return;
+		
+		for(var chan : excludedChannels) {
+			if(message.getChannel().getId() == chan.getId()) {
+				return;
+			}
+		}
+		
+		for(var am : AutoMod.getAutomods()) {
+			try {
+				var pattern = Pattern.compile(am.filteredSequence, Pattern.CASE_INSENSITIVE);
+				if(pattern.matcher(content).find() || StringUtils.containsIgnoreCase(content, am.filteredSequence)) {
+					var embed = new EmbedBuilder().setTitle("Automod");
+					embed.setAuthor(author);
+					embed.setUrl(message.getLink().toString());
+					embed.setFooter("UserID: " + author.getIdAsString());
+					if(am.punishment == null) {
+						embed.setDescription("Message deleted:\n```" + content + "```");
+						message.delete();
+					} else {
+						if(am.punishment == Punishment.KICK) {
+							Main.getServer().kickUser(author.asUser().get(), "Automod");
+							message.delete();
+							embed.setDescription("Kicked & Message deleted:\n```" + content + "```");
+						} else if(am.punishment == Punishment.BAN) {
+							Main.getServer().banUser(author.getId(), 0, "Automod");
+							message.delete();
+							embed.setDescription("Banned & Message deleted:\n```" + content + "```");
+						} else {
+							Main.getServer().timeoutUser(author.asUser().get(), Duration.ofMinutes(Long.parseLong(am.punishmentVal)), "Automod");
+							message.delete();
+							embed.setDescription("Timeouted & Message deleted:\n```" + content + "```");
+						}
+					}
+					Main.getConfig().getStaffActionChannel().sendMessage(embed);
+					break;
+				}
+			} catch (Exception e) {}
+		}
 	}
 
 }

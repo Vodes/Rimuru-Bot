@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.javacord.api.entity.channel.ChannelType;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -41,7 +40,9 @@ public class VerificationListener implements ReactionAddListener {
 								try {
 									answer = Double.parseDouble(e.getMessageContent());
 								} catch (Exception e2) {
-									sendFailEmbed(user, math, "Thinks he is funny", null, e.getMessageContent());
+//									sendFailEmbed(user, math, "Thinks he is funny", null, e.getMessageContent());
+									Main.getServer().timeoutUser(user, Duration.ofMinutes(5), "Incorrect Verification");
+									return;
 								}
 								if(answer == math.getResult()) {
 									role.addUser(e.getMessageAuthor().asUser().get());

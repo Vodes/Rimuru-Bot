@@ -1,5 +1,6 @@
 package pw.vodes.rimuru.audit;
 
+import java.net.SocketTimeoutException;
 import java.time.Instant;
 import java.util.ArrayList;
 
@@ -11,6 +12,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import pw.vodes.rimuru.Main;
 
 public class AuditLogs {
+	
+	private static boolean timeouted = false;
 
 	private static ArrayList<CommandStaffAction> staffActions = new ArrayList<CommandStaffAction>();
 
@@ -22,7 +25,7 @@ public class AuditLogs {
 		if (!hasStaffAction(action)) {
 			getStaffActions().add(action);
 			try {
-				Main.getStaffActionChannel().sendMessage(getEmbedForAction(action));
+				Main.getConfig().getStaffActionChannel().sendMessage(getEmbedForAction(action));
 			} catch (Exception e) {}
 			save();
 		}
@@ -93,13 +96,19 @@ public class AuditLogs {
 		}).start();
 	}
 	
+	
+	
 	public static void check() {
 		try {
 			var logs = Main.getServer().getAuditLog(20).get().getEntries();
 			for(var log : logs) {
-				if(log.getCreationTimestamp().isBefore(Instant.now().minusSeconds(3))) {
+				if(log.getCreationTimestamp().isBefore(Instant.now().minusSeconds(timeouted ? 8 : 3))) {
 					continue;
 				}
+				
+				if(log.getUser().get().isYourself())
+					continue;
+				
 				switch (log.getType()) {
 				case MEMBER_BAN_ADD: {
 					registerStaffAction(new CommandStaffAction(Instant.now().getEpochSecond()
@@ -125,12 +134,21 @@ public class AuditLogs {
 					, StaffActionType.kick));
 					break;
 				}
+//				case MEMBER_UPDATE: {
+//					for(var item : log.getChanges()) {
+//						if(item.getType() == )
+//					}
+//				}
 				default:
 					break;
 				}
 			}
+			timeouted = false;
 		} catch (Exception e1) {
-			e1.printStackTrace();
+			if(e1 instanceof SocketTimeoutException) {
+				timeouted = true;
+			} else 
+				e1.printStackTrace();
 		}
 	}
 

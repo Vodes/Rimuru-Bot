@@ -1,7 +1,5 @@
 package pw.vodes.rimuru;
 
-import java.util.concurrent.ExecutionException;
-
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
@@ -18,7 +16,7 @@ import pw.vodes.rimuru.file.AutoRoles;
 import pw.vodes.rimuru.file.FileManager;
 import pw.vodes.rimuru.listeners.MemberJoinListener;
 import pw.vodes.rimuru.listeners.MemberLeaveListener;
-import pw.vodes.rimuru.verification.VerificationListener;
+import pw.vodes.rimuru.verification.VerificationPurgeThread;
 
 public class Main {
 	
@@ -59,16 +57,18 @@ public class Main {
 		AutoRoles.load();
 		AutoMod.load();
 		AuditLogs.init();
+		new VerificationPurgeThread().start();
 		
 		
 		api.addMessageCreateListener(e -> commandManager.tryRunCommand(e));
-		api.addMessageCreateListener(AutoMod.getAutomodListener());
+		api.addMessageCreateListener(AutoMod.getAutomodCreateListener());
+		api.addMessageEditListener(AutoMod.getAutomodEditListener());
 		api.addServerMemberJoinListener(new MemberJoinListener());
 		api.addServerMemberLeaveListener(new MemberLeaveListener());
 	}
 	
 	public static String getVersion() {
-		return "0.0.3";
+		return "0.0.4";
 	}
 	
 	public static FileManager getFiles() {
@@ -93,18 +93,6 @@ public class Main {
 	
 	public static ObjectMapper getMapper() {
 		return mapper;
-	}
-	
-	public static TextChannel getStaffActionChannel() {
-		return staffActionChannel;
-	}
-	
-	public static TextChannel getLogChannel() {
-		return logChannel;
-	}
-	
-	public static TextChannel getHallOfShameChannel() {
-		return hallOfShameChannel;
 	}
 	
 }
