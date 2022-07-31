@@ -24,17 +24,18 @@ public class VerificationPurgeThread extends Thread {
 						if(shouldKick(user)) {
 							if(user.getJoinedAtTimestamp(Main.getServer()).get().isBefore(purgeTime)) {
 								Main.getServer().kickUser(user, "Unverified for 3+ days.").thenRun(() -> {
-									var embed = new EmbedBuilder().setTitle(StaffActionType.kick.getMessageTitle())
-											.setFooter("ID: " + user.getIdAsString())
-											.setAuthor(Main.api.getYourself())
-											.setThumbnail(user.getAvatar(4096))
-											.setDescription("Unverified for 3+ days");
-									Main.getConfig().getOtherLogChannel().sendMessage(embed);
+									AuditLogs.registerStaffAction(new CommandStaffAction(Instant.now().getEpochSecond()
+											, user.getIdAsString()
+											, Main.api.getYourself().getIdAsString()
+											, "Unverified for 3+ days"
+											, StaffActionType.kick));
 								});
 							}
 						}
 					}
-				} catch (Exception e) {}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			try {
 				Thread.sleep(600000);

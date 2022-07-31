@@ -34,6 +34,7 @@ public class ConfigAdapter {
 		automodExcludedCategories.addAll(Main.getConfigFile().automod_excluded_categories);
 		commandPrefix = Main.getConfigFile().command_prefix;
 		projectPrefix = Main.getConfigFile().project_prefix;
+		purgeUnverified = Main.getConfigFile().purge_unverified_3days;
 		
 		for(var roleID : Main.getConfigFile().mod_roles) {
 			Optional<Role> role;
