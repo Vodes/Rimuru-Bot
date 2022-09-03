@@ -15,6 +15,7 @@ public class ConfigAdapter {
 	private ArrayList<String> automodExcludedCategories = new ArrayList<>();
 	
 	private String commandPrefix, projectPrefix;
+	private String u2PassKey;
 	private TextChannel lobbyChannel;
 
 	// Verification Stuff
@@ -35,6 +36,7 @@ public class ConfigAdapter {
 		commandPrefix = Main.getConfigFile().command_prefix;
 		projectPrefix = Main.getConfigFile().project_prefix;
 		purgeUnverified = Main.getConfigFile().purge_unverified_3days;
+		u2PassKey = Main.getConfigFile().u2_passkey;
 		
 		for(var roleID : Main.getConfigFile().mod_roles) {
 			Optional<Role> role;
@@ -106,7 +108,10 @@ public class ConfigAdapter {
 	public boolean shouldPurgeUnverified() {
 		return purgeUnverified;
 	}
-
+	
+	public String getU2PassKey() {
+		return u2PassKey;
+	}
 
 	public TextChannel getStaffActionChannel() {
 		return staffActionChannel;

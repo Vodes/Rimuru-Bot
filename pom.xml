@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>pw.vodes</groupId>
 	<artifactId>rimuru</artifactId>
-	<version>0.0.4</version>
+	<version>0.1.0</version>
 	<name>Rimuru</name>
 	<description>Rimuru (Discord, ?) Bot</description>
 	<properties>
@@ -57,6 +57,11 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.11.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.apptasticsoftware</groupId>
+			<artifactId>rssreader</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -49,7 +49,7 @@ public class CommandStealEmote extends Command {
 				var emote = event.getMessage().getCustomEmojis().get(0);
 				var name = emote.getName();
 				
-				if(emoteWithNameExists(name) || (args.get(2).isBlank() ? false : emoteWithNameExists(args.get(2)))) {
+				if(emoteWithNameExists(name) && (args.get(2).isBlank() ? true : emoteWithNameExists(args.get(2)))) {
 					event.getChannel().sendMessage("An emote with that name already exists!");
 					return;
 				}

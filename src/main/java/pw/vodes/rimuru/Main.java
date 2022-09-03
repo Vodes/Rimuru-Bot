@@ -3,7 +3,6 @@ package pw.vodes.rimuru;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
-import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.server.Server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,6 +15,7 @@ import pw.vodes.rimuru.file.AutoRoles;
 import pw.vodes.rimuru.file.FileManager;
 import pw.vodes.rimuru.listeners.MemberJoinListener;
 import pw.vodes.rimuru.listeners.MemberLeaveListener;
+import pw.vodes.rimuru.rss.FeedManager;
 import pw.vodes.rimuru.verification.VerificationPurgeThread;
 
 public class Main {
@@ -28,9 +28,7 @@ public class Main {
 	private static CommandManager commandManager;
 	
 	private static Server server;
-	
-	private static TextChannel logChannel, staffActionChannel, hallOfShameChannel;
-	
+		
 	public static void main(String[] args) {
 		fileManager = new FileManager(args.length > 0 ? args[0] : null);
 		try {
@@ -57,6 +55,7 @@ public class Main {
 		AutoRoles.load();
 		AutoMod.load();
 		AuditLogs.init();
+		FeedManager.load();
 		new VerificationPurgeThread().start();
 		
 		
@@ -68,7 +67,7 @@ public class Main {
 	}
 	
 	public static String getVersion() {
-		return "0.0.4";
+		return "0.1.0";
 	}
 	
 	public static FileManager getFiles() {

@@ -63,7 +63,7 @@ public abstract class Command {
 			list.add(s);
 		}
 		// Add empty strings for convenience lmao
-		while(list.size() < 5) {
+		while(list.size() < 8) {
 			list.add("");
 		}
 		return list;
