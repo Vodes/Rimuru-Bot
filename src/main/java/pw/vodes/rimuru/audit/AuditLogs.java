@@ -34,7 +34,7 @@ public class AuditLogs {
 	public static boolean userWasKickedOrBanned(User user) {
 		for (var sa : getStaffActions()) {
 			if(sa.affectedUser.equalsIgnoreCase(user.getIdAsString())) {
-				if(Math.abs(sa.time - Instant.now().getEpochSecond()) < 3) {
+				if(Math.abs(sa.time - Instant.now().getEpochSecond()) < 5) {
 					return true;
 				}
 			}
@@ -102,7 +102,7 @@ public class AuditLogs {
 		try {
 			var logs = Main.getServer().getAuditLog(20).get().getEntries();
 			for(var log : logs) {
-				if(log.getCreationTimestamp().isBefore(Instant.now().minusSeconds(timeouted ? 8 : 3))) {
+				if(log.getCreationTimestamp().isBefore(Instant.now().minusSeconds(timeouted ? 10 : 5))) {
 					continue;
 				}
 				
