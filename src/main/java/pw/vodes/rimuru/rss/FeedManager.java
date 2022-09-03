@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import pw.vodes.rimuru.Main;
-import pw.vodes.rimuru.file.sub.AutoRole;
 
 public class FeedManager {
 	

@@ -2,7 +2,6 @@ package pw.vodes.rimuru.file;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 
 import org.javacord.api.event.message.reaction.ReactionAddEvent;

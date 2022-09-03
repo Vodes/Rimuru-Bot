@@ -1,7 +1,6 @@
 package pw.vodes.rimuru.listeners;
 
 import java.time.Instant;
-import java.util.logging.LogRecord;
 
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.server.member.ServerMemberJoinEvent;

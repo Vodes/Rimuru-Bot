@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
-import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 

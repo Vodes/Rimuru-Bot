@@ -3,7 +3,6 @@ package pw.vodes.rimuru.file;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,20 +10,16 @@ import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.entity.permission.Role;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.MessageEditEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.listener.message.MessageEditListener;
-import org.javacord.api.listener.message.reaction.ReactionAddListener;
-import org.javacord.api.listener.message.reaction.ReactionRemoveListener;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import pw.vodes.rimuru.Main;
 import pw.vodes.rimuru.file.sub.AutoModFile;
 import pw.vodes.rimuru.file.sub.AutoModFile.Punishment;
-import pw.vodes.rimuru.file.sub.AutoRole;
 
 public class AutoMod {
 	

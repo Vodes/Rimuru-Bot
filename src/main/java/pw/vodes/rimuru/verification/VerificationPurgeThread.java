@@ -3,7 +3,6 @@ package pw.vodes.rimuru.verification;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.user.User;
 
