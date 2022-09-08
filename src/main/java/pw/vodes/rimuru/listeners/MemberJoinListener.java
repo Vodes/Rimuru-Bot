@@ -23,7 +23,7 @@ public class MemberJoinListener implements ServerMemberJoinListener {
 							getRelativeStamp(event.getUser().getCreationTimestamp()),
 							getAbsoluteStamp(event.getUser().getCreationTimestamp())));
 			try {
-				Main.getConfig().getOtherLogChannel().sendMessage(embed);
+				Main.getConfig().getUserLogChannel().sendMessage(embed);
 			} catch (Exception e) {
 				LogRepeater.embedsToSend.add(embed);
 			}

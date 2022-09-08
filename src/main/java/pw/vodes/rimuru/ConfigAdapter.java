@@ -25,7 +25,7 @@ public class ConfigAdapter {
 	private boolean purgeUnverified;
 	
 	//Log
-	private TextChannel staffActionChannel, otherLogChannel;
+	private TextChannel userLogChannel, otherLogChannel;
 
 	
 	public ConfigAdapter() {
@@ -59,11 +59,11 @@ public class ConfigAdapter {
 			}
 		}
 		
-		if(!Main.getConfigFile().staff_action_log_channel.isBlank())
-			staffActionChannel = Main.getServer().getTextChannelById(Main.getConfigFile().staff_action_log_channel).orElseGet(null);
+		if(!Main.getConfigFile().user_log_channel.isBlank())
+			userLogChannel = Main.getServer().getTextChannelById(Main.getConfigFile().user_log_channel).orElseGet(null);
 		
-		if(!Main.getConfigFile().auditlog_replacement_channel.isBlank())
-			otherLogChannel = Main.getServer().getTextChannelById(Main.getConfigFile().auditlog_replacement_channel).orElseGet(null);
+		if(!Main.getConfigFile().other_log_channel.isBlank())
+			otherLogChannel = Main.getServer().getTextChannelById(Main.getConfigFile().other_log_channel).orElseGet(null);
 	}
 
 
@@ -113,8 +113,8 @@ public class ConfigAdapter {
 		return u2PassKey;
 	}
 
-	public TextChannel getStaffActionChannel() {
-		return staffActionChannel;
+	public TextChannel getUserLogChannel() {
+		return userLogChannel;
 	}
 
 

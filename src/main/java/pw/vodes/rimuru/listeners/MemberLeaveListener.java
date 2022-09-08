@@ -29,7 +29,7 @@ public class MemberLeaveListener implements ServerMemberLeaveListener {
 						.setTitle(event.getUser().getDiscriminatedName())
 						.setDescription(event.getUser().getMentionTag());
 				try {
-					Main.getConfig().getOtherLogChannel().sendMessage(embed);
+					Main.getConfig().getUserLogChannel().sendMessage(embed);
 				} catch (Exception e) {
 					LogRepeater.embedsToSend.add(embed);
 				}

@@ -16,6 +16,7 @@ import pw.vodes.rimuru.file.FileManager;
 import pw.vodes.rimuru.listeners.MemberJoinListener;
 import pw.vodes.rimuru.listeners.MemberLeaveListener;
 import pw.vodes.rimuru.rss.FeedManager;
+import pw.vodes.rimuru.update.Updater;
 import pw.vodes.rimuru.verification.VerificationPurgeThread;
 
 public class Main {
@@ -26,6 +27,7 @@ public class Main {
 	private static ConfigAdapter config;
 	private static ObjectMapper mapper = new ObjectMapper();
 	private static CommandManager commandManager;
+	private static Updater updater;
 	
 	private static Server server;
 		
@@ -52,6 +54,7 @@ public class Main {
 		server = (Server) api.getServers().toArray()[0];
 		config = new ConfigAdapter();
 		commandManager = new CommandManager().init();
+		updater = new Updater().init();
 		AutoRoles.load();
 		AutoMod.load();
 		AuditLogs.init();
@@ -67,7 +70,7 @@ public class Main {
 	}
 	
 	public static String getVersion() {
-		return "0.1.0";
+		return "0.1.1";
 	}
 	
 	public static FileManager getFiles() {
@@ -92,6 +95,14 @@ public class Main {
 	
 	public static ObjectMapper getMapper() {
 		return mapper;
+	}
+	
+	public static Updater getUpdater() {
+		return updater;
+	}
+	
+	public static void reportException(Exception ex) {
+		
 	}
 	
 }

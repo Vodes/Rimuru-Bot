@@ -7,6 +7,11 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import pw.vodes.rimuru.ConfigFile;
+import pw.vodes.rimuru.Main;
+
 public class FileManager {
 	
 	private String configDir = null;
@@ -40,6 +45,12 @@ public class FileManager {
 	
 	public boolean exists(String name) {
 		return new File(getConfigDir(), name).exists();
+	}
+	
+	public void saveConfig() {
+		try {
+			write("config.json", Main.getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(Main.getConfigFile()));
+		} catch (JsonProcessingException e1) {}
 	}
 	
 	public File getConfigDir() {

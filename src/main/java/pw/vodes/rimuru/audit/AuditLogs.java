@@ -25,7 +25,7 @@ public class AuditLogs {
 		if (!hasStaffAction(action)) {
 			getStaffActions().add(action);
 			try {
-				Main.getConfig().getStaffActionChannel().sendMessage(getEmbedForAction(action));
+				Main.getConfig().getUserLogChannel().sendMessage(getEmbedForAction(action));
 			} catch (Exception e) {}
 			save();
 		}

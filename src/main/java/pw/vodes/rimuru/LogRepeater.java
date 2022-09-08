@@ -16,7 +16,7 @@ public class LogRepeater {
 				embedsToSend.clear();
 				for(var embed : toSend) {
 					try {
-							Main.getConfig().getOtherLogChannel().sendMessage(embed);
+							Main.getConfig().getUserLogChannel().sendMessage(embed);
 					} catch (Exception e) { embedsToSend.add(embed); }
 				}
 				try {

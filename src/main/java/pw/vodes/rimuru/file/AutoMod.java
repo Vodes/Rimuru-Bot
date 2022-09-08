@@ -131,7 +131,7 @@ public class AutoMod {
 							embed.setDescription("Timeouted & Message deleted:\n```" + content + "```");
 						}
 					}
-					Main.getConfig().getStaffActionChannel().sendMessage(embed);
+					Main.getConfig().getUserLogChannel().sendMessage(embed);
 					break;
 				}
 			} catch (Exception e) {}

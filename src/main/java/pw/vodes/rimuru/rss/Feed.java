@@ -134,7 +134,10 @@ public class Feed {
 				embed.setUrl(url);
 			
 			embed.setTimestamp(Instant.ofEpochSecond(item.publicationUnixTime()));
-			getChannel().sendMessage(embed).thenRun(() -> item.setWasPosted(true));
+			getChannel().sendMessage(embed).thenRun(() -> item.setWasPosted(true)).exceptionally(ex -> {
+				ex.printStackTrace();
+				return null;
+			});
 			if(firstCheck) {
 				if(Instant.ofEpochSecond(item.publicationUnixTime()).isBefore(Instant.now().minus(24, ChronoUnit.HOURS))) {
 					break;
