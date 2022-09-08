@@ -1,8 +1,11 @@
 package pw.vodes.rimuru;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -38,6 +41,25 @@ public class Util {
 		} catch (Exception e) {
 			// This shouldn't happen...
 		}
+	}
+	
+	public static ProcessBuilder getSystemProcessBuilder(List<String> commands) {
+		ProcessBuilder process = null;
+		ArrayList<String> commandList = new ArrayList<>();
+		if (SystemUtils.IS_OS_WINDOWS) {
+			commandList.add("cmd");
+			commandList.add("/c");
+//			commandList.add("start");
+		} else if (SystemUtils.IS_OS_LINUX) {
+			commandList.add("bash");
+			commandList.add("-c");
+		} else if (SystemUtils.IS_OS_MAC) {
+			commandList.add("/bin/bash");
+			commandList.add("-c");
+		}
+		commandList.addAll(commands);
+		process = new ProcessBuilder(commandList);
+		return process;
 	}
 	
 	public static class MessageDeleteThread extends Thread {

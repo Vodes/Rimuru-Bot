@@ -18,10 +18,14 @@ public class CommandHelp extends Command {
 
 	@Override
 	public void run(MessageCreateEvent event) {
+		var commit = Main.getConfigFile().updateConfig.current_commit;
+		var version = commit.isBlank() 
+				? Main.getVersion()
+				: String.format("%s [@%s](https://github.com/Vodes/Rimuru-Bot/commit/%s)", Main.getVersion(), commit.substring(0, 6), commit);
 		var embed = new EmbedBuilder().setTitle("Rimuru-Bot")
 				.setAuthor(event.getMessageAuthor())
 				.setThumbnail(Main.api.getYourself().getAvatar(4096))
-				.addField("Version", Main.getVersion(), true)
+				.addField("Version", version, true)
 				.addField("Written by", "<@129871096299126784>", true)
 				.addField("Source code", "https://github.com/Vodes/Rimuru-Bot", false);
 		
