@@ -101,8 +101,4 @@ public class Main {
 		return updater;
 	}
 	
-	public static void reportException(Exception ex) {
-		
-	}
-	
 }

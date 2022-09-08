@@ -64,14 +64,10 @@ public class CommandUserInfo extends Command {
 			}
 		}
 		if(user == null) {
-			try {
-				if(message.split(" ")[1].replaceAll("\\D+", "").isEmpty()) {
-					event.getChannel().sendMessage("IDs are only numbers.");
-				} else {
-					event.getChannel().sendMessage("Cant find a user for that ID.");
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+			if(message.split(" ")[1].replaceAll("\\D+", "").isEmpty()) {
+				event.getChannel().sendMessage("IDs are only numbers.");
+			} else {
+				event.getChannel().sendMessage("Cant find a user for that ID.");
 			}
 			return;
 		}

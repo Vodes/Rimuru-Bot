@@ -15,9 +15,7 @@ public class MemberLeaveListener implements ServerMemberLeaveListener {
 		new Thread(() -> {
 			try {
 				Thread.sleep(750);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			} catch (InterruptedException e) {}
 			AuditLogs.check();
 			if(AuditLogs.userWasKickedOrBanned(event.getUser())) {
 				return;
@@ -29,7 +27,7 @@ public class MemberLeaveListener implements ServerMemberLeaveListener {
 						.setTitle(event.getUser().getDiscriminatedName())
 						.setDescription(event.getUser().getMentionTag());
 				try {
-					Main.getConfig().getUserLogChannel().sendMessage(embed);
+					Main.getConfig().getUserLogChannel().sendMessage(embed).join();
 				} catch (Exception e) {
 					LogRepeater.embedsToSend.add(embed);
 				}

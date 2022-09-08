@@ -135,7 +135,7 @@ public class Feed {
 			
 			embed.setTimestamp(Instant.ofEpochSecond(item.publicationUnixTime()));
 			getChannel().sendMessage(embed).thenRun(() -> item.setWasPosted(true)).exceptionally(ex -> {
-				ex.printStackTrace();
+				Util.reportException(ex, this.getClass().getCanonicalName());
 				return null;
 			});
 			if(firstCheck) {

@@ -42,15 +42,11 @@ public class FeedManager {
 					save();
 					try {
 						Thread.sleep(30000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					} catch (InterruptedException e) {}
 				}
 				try {
 					Thread.sleep(600000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				} catch (InterruptedException e) {}
 			}
 		}).start();
 	}

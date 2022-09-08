@@ -9,7 +9,6 @@ import org.apache.commons.lang3.SystemUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import pw.vodes.rimuru.ConfigFile;
 import pw.vodes.rimuru.Main;
 
 public class FileManager {

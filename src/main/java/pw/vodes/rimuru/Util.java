@@ -3,7 +3,9 @@ package pw.vodes.rimuru;
 import java.security.SecureRandom;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 public class Util {
 
@@ -13,6 +15,31 @@ public class Util {
 	public static final Pattern u2PasskeyURLPattern = Pattern.compile("https?:\\/\\/u2\\.dmhy\\.org\\/torrentrss\\.php.*(passkey=[^& ]*).*", Pattern.CASE_INSENSITIVE);
 	public static final Pattern nyaaAutismPattern = Pattern.compile("(<.*>)(#\\d*) \\| (.+)(?:<\\/a>) \\| (\\d*\\.\\d* (?:GiB|MiB|TiB)) \\| ([^|]*) \\| (.*)", Pattern.CASE_INSENSITIVE);
 
+	
+	public static void reportException(Throwable ex) {
+		reportException(ex, null);
+	}
+	
+	public static void reportException(Throwable ex, String source) {
+		try {
+			var stackTrace = ExceptionUtils.getStackTrace(ex);
+			var message = ExceptionUtils.getMessage(ex);
+			System.out.println(stackTrace);
+			// Trim to avoid message that's too long for discord
+			var trimmed = stackTrace.substring(stackTrace.indexOf('\n') + 1, Math.min(stackTrace.length(), 1200));
+			var embed = new EmbedBuilder()
+					.setTitle("Exception thrown!")
+					.setDescription(trimmed.toLowerCase().contains("pw.vodes.rimuru") ? 
+							String.format("%s\n```\n%s\n```", message, trimmed) 
+							: message);
+			if(source != null && !source.isBlank())
+				embed.setFooter("Source: " + source);
+			Main.getConfig().getOtherLogChannel().sendMessage(embed);
+		} catch (Exception e) {
+			// This shouldn't happen...
+		}
+	}
+	
 	public static class MessageDeleteThread extends Thread {
 
 		public Message msg;
