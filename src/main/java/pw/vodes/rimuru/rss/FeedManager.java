@@ -36,6 +36,11 @@ public class FeedManager {
 	
 	private static void startChecking() {
 		new Thread(() -> {
+			try {
+				Thread.sleep(30000);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
 			while(true) {
 				for(var feed : feeds) {
 					feed.check();

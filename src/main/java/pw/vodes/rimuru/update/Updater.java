@@ -48,20 +48,22 @@ public class Updater {
 				break;
 			}
 
-			msg.edit("Repo cloned. Newest commit: `" + newest + "`");
+			msg.edit("Repo cloned. Latest commit: `" + newest + "`");
 
-			var progressString = "Building jar from newest commit...";
+			var progressString = "Building jar from latest commit...";
 			msg = event.getChannel().sendMessage(progressString).get();
-			var process = Util.getSystemProcessBuilder(Arrays.asList("mvn clean compile assembly:single")).directory(repoDir).start();
+			var process = SystemUtils.IS_OS_WINDOWS ?
+					Util.getSystemProcessBuilder(Arrays.asList("mvn -q clean compile assembly:single")).directory(repoDir).start() :
+					new ProcessBuilder().command("sh", "-c", "mvn -q clean compile assembly:single").directory(repoDir).start();
+			process.waitFor();
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				String line = null;
 				while ((line = reader.readLine()) != null) {
 					if (line.trim().equalsIgnoreCase("[INFO] BUILD SUCCESS"))
 						msg.edit(progressString = (progressString + " Done ✅"));
 
-					if (StringUtils.startsWithIgnoreCase(line.trim(), "[INFO] Total time:")) {
+					if (StringUtils.startsWithIgnoreCase(line.trim(), "[INFO] Total time:")) 
 						msg.edit(progressString + "\nBuild took: " + line.split(":")[1].trim());
-					}
 				}
 			} catch (Exception e) {
 				Util.reportException(e, this.getClass().getCanonicalName() + " at mvn process");
