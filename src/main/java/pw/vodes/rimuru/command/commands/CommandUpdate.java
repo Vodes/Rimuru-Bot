@@ -14,7 +14,9 @@ public class CommandUpdate extends Command {
 
 	@Override
 	public void run(MessageCreateEvent event) {
-		Main.getUpdater().run(event);
+		if(Main.getUpdater().run(event)) {
+			Main.getUpdater().restart();
+		}
 	}
 
 }

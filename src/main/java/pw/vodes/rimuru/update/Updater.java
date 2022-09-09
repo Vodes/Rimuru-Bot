@@ -2,6 +2,7 @@ package pw.vodes.rimuru.update;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.jgit.api.Git;
 import org.javacord.api.event.message.MessageCreateEvent;
 
@@ -18,9 +20,9 @@ import pw.vodes.rimuru.Main;
 import pw.vodes.rimuru.Util;
 
 public class Updater {
-	
+
 	private File jar;
-	
+
 	public Updater init() {
 		String path = Updater.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		try {
@@ -31,37 +33,33 @@ public class Updater {
 		}
 		return this;
 	}
-	
+
 	public boolean run(MessageCreateEvent event) {
 		var repoDir = new File(Main.getFiles().getConfigDir(), "Rimuru-Git");
 		Git git = null;
 		try {
 			var msg = event.getChannel().sendMessage("Cloning repo...").get();
-			git = Git.cloneRepository()
-					.setURI(Main.getConfigFile().updateConfig.git_repo)
-					.setBranch(Main.getConfigFile().updateConfig.branch)
-					.setDirectory(repoDir)
-					.call();
-			
+			git = Git.cloneRepository().setURI(Main.getConfigFile().updateConfig.git_repo).setBranch(Main.getConfigFile().updateConfig.branch).setDirectory(repoDir).call();
+
 			var logs = git.log().call();
 			String newest = "";
-			for(var log : logs) {
+			for (var log : logs) {
 				newest = log.getName();
 				break;
 			}
-			
+
 			msg.edit("Repo cloned. Newest commit: `" + newest + "`");
-			
+
 			var progressString = "Building jar from newest commit...";
 			msg = event.getChannel().sendMessage(progressString).get();
 			var process = Util.getSystemProcessBuilder(Arrays.asList("mvn clean compile assembly:single")).directory(repoDir).start();
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				String line = null;
 				while ((line = reader.readLine()) != null) {
-					if(line.trim().equalsIgnoreCase("[INFO] BUILD SUCCESS"))
+					if (line.trim().equalsIgnoreCase("[INFO] BUILD SUCCESS"))
 						msg.edit(progressString = (progressString + " Done ✅"));
-					
-					if(StringUtils.startsWithIgnoreCase(line.trim(), "[INFO] Total time:")) {
+
+					if (StringUtils.startsWithIgnoreCase(line.trim(), "[INFO] Total time:")) {
 						msg.edit(progressString + "\nBuild took: " + line.split(":")[1].trim());
 					}
 				}
@@ -70,21 +68,21 @@ public class Updater {
 			}
 			var targetDir = new File(repoDir, "target");
 			File newJar = null;
-			for(var file : targetDir.listFiles()) {
-				if(file.getName().toLowerCase().contains(".jar")) {
+			for (var file : targetDir.listFiles()) {
+				if (file.getName().toLowerCase().contains(".jar")) {
 					newJar = file;
 					break;
 				}
 			}
-			if(newJar != null) {
-				if(this.jar.getName().toLowerCase().contains(".jar")) {
+			if (newJar != null) {
+				if (this.jar.getName().toLowerCase().contains(".jar")) {
 					Files.move(newJar.toPath(), jar.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				}
 				event.getChannel().sendMessage("Moved finished build.\nRestarting...");
 			} else {
 				return false;
 			}
-			
+
 			Main.getConfigFile().updateConfig.current_commit = newest;
 			Main.getConfigFile().updateConfig.restart_trigger = event.getMessageLink().toString();
 			Main.getFiles().saveConfig();
@@ -92,14 +90,29 @@ public class Updater {
 		} catch (Exception e) {
 			Util.reportException(e, this.getClass().getCanonicalName());
 		} finally {
-			if(git != null)
+			if (git != null)
 				git.close();
 			FileUtils.deleteQuietly(repoDir);
 		}
 		return false;
 	}
-	
-	public void restart() {
 
+	public void restart() {
+		// This entire ordeal will probably only work on linux for now.
+		// Requires the gnu screen utility on linux
+		
+		var command = String.format("screen -dmS Rimuru bash -c 'sleep 2; java %s -jar \"%s\"'", Main.getConfigFile().updateConfig.custom_jvm_args, jar.getAbsolutePath());
+		if(SystemUtils.IS_OS_WINDOWS) {
+			command = String.format("timeout 2 >nul & java %s -jar \"%s\"", Main.getConfigFile().updateConfig.custom_jvm_args, jar.getAbsolutePath());
+		}
+		try {
+			if(SystemUtils.IS_OS_WINDOWS) {
+				Util.getSystemProcessBuilder(Arrays.asList("start", command)).start();
+			} else
+				Util.getSystemProcessBuilder(Arrays.asList(command)).start();
+			System.exit(0);
+		} catch (IOException e) {			
+			e.printStackTrace();
+		}
 	}
 }

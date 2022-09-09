@@ -55,12 +55,12 @@ public class Main {
 		config = new ConfigAdapter();
 		commandManager = new CommandManager().init();
 		updater = new Updater().init();
+		checkRestart();
 		AutoRoles.load();
 		AutoMod.load();
 		AuditLogs.init();
 		FeedManager.load();
 		new VerificationPurgeThread().start();
-		
 		
 		api.addMessageCreateListener(e -> commandManager.tryRunCommand(e));
 		api.addMessageCreateListener(AutoMod.getAutomodCreateListener());
@@ -99,6 +99,19 @@ public class Main {
 	
 	public static Updater getUpdater() {
 		return updater;
+	}
+	
+	private static void checkRestart() {
+		if(getConfigFile().updateConfig.restart_trigger.isBlank())
+			return;
+		
+		var msg = api.getMessageByLink(getConfigFile().updateConfig.restart_trigger);
+		if(msg.isPresent()) {
+			var message = msg.get().join();
+			message.getChannel().sendMessage("Restarted!");
+			Main.getConfigFile().updateConfig.restart_trigger = "";
+			Main.getFiles().saveConfig();
+		}
 	}
 	
 }

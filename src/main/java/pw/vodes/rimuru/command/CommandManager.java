@@ -17,6 +17,7 @@ import pw.vodes.rimuru.command.commands.CommandClear;
 import pw.vodes.rimuru.command.commands.CommandHelp;
 import pw.vodes.rimuru.command.commands.CommandKick;
 import pw.vodes.rimuru.command.commands.CommandRSS;
+import pw.vodes.rimuru.command.commands.CommandRestart;
 import pw.vodes.rimuru.command.commands.CommandStealEmote;
 import pw.vodes.rimuru.command.commands.CommandUpdate;
 import pw.vodes.rimuru.command.commands.CommandUserInfo;
@@ -36,6 +37,7 @@ public class CommandManager {
 		commands.add(new CommandHelp());
 		commands.add(new CommandRSS());
 		commands.add(new CommandUpdate());
+		commands.add(new CommandRestart());
 		loadStatus();
 		return this;
 	}
