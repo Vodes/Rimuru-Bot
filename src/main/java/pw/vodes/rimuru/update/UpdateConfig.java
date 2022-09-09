@@ -6,8 +6,9 @@ public class UpdateConfig {
 	public String branch = "master";
 	public String current_commit = "";
 	
-	public String custom_jvm_args = "";
+	public String custom_jvm_args = "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xmx1G -Xmx2G";
 	public boolean allow_update = true;
 	public String restart_trigger = "";
 	
 }
+	

@@ -56,7 +56,9 @@ public class FeedItem {
 	
 	public static FeedItem ofItem(Item item) {
 		var feeditem = new FeedItem();
-		feeditem.setTitle(item.getTitle().orElse(""));
+		var title = item.getTitle().orElse("");
+		title = title.replace("&quot;", "\"").replace("&amp;", "&");
+		feeditem.setTitle(title);
 		feeditem.setAuthor(item.getAuthor().orElse(""));
 		feeditem.setCategory(item.getCategory().orElse(""));
 		feeditem.setDescription(item.getDescription().orElse(""));
