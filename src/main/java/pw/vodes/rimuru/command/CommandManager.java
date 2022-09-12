@@ -39,6 +39,12 @@ public class CommandManager {
 		commands.add(new CommandUpdate());
 		commands.add(new CommandRestart());
 		loadStatus();
+		
+		for(var cmd : commands) {
+			if(cmd.isEnabled()) {
+				cmd.initSlashCommand();
+			}
+		}
 		return this;
 	}
 	

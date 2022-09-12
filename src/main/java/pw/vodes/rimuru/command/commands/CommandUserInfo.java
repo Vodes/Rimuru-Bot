@@ -14,8 +14,12 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.reaction.ReactionAddEvent;
+import org.javacord.api.interaction.SlashCommand;
+import org.javacord.api.interaction.SlashCommandOption;
+import org.javacord.api.interaction.SlashCommandOptionType;
 import org.javacord.api.listener.message.reaction.ReactionAddListener;
 
+import pw.vodes.rimuru.Main;
 import pw.vodes.rimuru.command.Command;
 import pw.vodes.rimuru.command.CommandType;
 
@@ -24,6 +28,14 @@ public class CommandUserInfo extends Command {
 	public CommandUserInfo() {
 		super("UserInfo", new String[] {"userinfo", "ui", "av", "avatar"}, CommandType.everyone);
 		setUsage("!userinfo <user-id/mention> (--server/-s)");
+	}
+	
+	@Override
+	public void initSlashCommand() {
+//		var command = SlashCommand.with(getName(), "Shows profile picture and other info about a user")
+//				.setDefaultEnabledForEveryone().setEnabledInDms(true)
+//				.addOption(SlashCommandOption.create(SlashCommandOptionType.USER, "user", ""))
+//				.createGlobal(Main.api);
 	}
 
 	@Override

@@ -52,6 +52,10 @@ public abstract class Command {
 	
 	public abstract void run(MessageCreateEvent event);
 	
+	public void initSlashCommand() {
+		
+	}
+	
 	public List<String> getSplitMessage(MessageCreateEvent event){
 		var list = new ArrayList<String>();
 		var m = Util.messageSplitPattern.matcher(event.getMessageContent());
