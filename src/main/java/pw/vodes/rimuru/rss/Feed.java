@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.unbescape.html.HtmlEscape;
 
 import com.apptasticsoftware.rssreader.RssReader;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -112,7 +113,7 @@ public class Feed {
 			if(item.wasPosted())
 				continue;
 			var embed = new EmbedBuilder();
-			var title = item.getTitle();
+			var title = HtmlEscape.unescapeHtml(item.getTitle());
 			// Embed titles are 256 max
 			if(title.length() > 256)
 				title = title.substring(0, 250) + "...";
