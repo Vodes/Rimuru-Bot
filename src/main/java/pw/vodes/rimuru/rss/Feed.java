@@ -112,7 +112,12 @@ public class Feed {
 			if(item.wasPosted())
 				continue;
 			var embed = new EmbedBuilder();
-			embed.setTitle(item.getTitle());
+			var title = item.getTitle();
+			// Embed titles are 256 max
+			if(title.length() > 256)
+				title = title.substring(0, 250) + "...";
+			
+			embed.setTitle(title);
 			
 			if(isU2 || isNyaa) {
 				embed.setAuthor(isU2 ? "U2" : "Nyaa", isU2 ? "https://u2.dmhy.org" : "https://nyaa.si", isU2 ? "https://i.imgur.com/lNorPYS.png" : "https://nyaa.si/static/favicon.png");
