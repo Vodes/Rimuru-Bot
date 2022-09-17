@@ -23,6 +23,8 @@ public class CommandRSS extends Command {
 				+ "Make sure to not have any passkeys in there lmao\n"
 				+ "`rss delete <number of feed>`\n"
 				+ "Deletes the feed\n"
+				+ "`rss update-link/link <number of feed> <link>`\n"
+				+ "Changes the link of a feed\n"
 				+ "`rss list`\n"
 				+ "Lists the current feeds (including numbers needed for deletion)");
 	}
@@ -65,10 +67,25 @@ public class CommandRSS extends Command {
 				return;
 			}
 			try {
-				FeedManager.getFeeds().remove(Integer.parseInt(args.get(2)));
+				FeedManager.getFeeds().remove(Integer.parseInt(args.get(2)) - 1);
 				FeedManager.save();
 			} catch (Exception e) {
-				event.getChannel().sendMessage("Failed to remove feed with that index. Maybe it doesn't exit?");
+				event.getChannel().sendMessage("Failed to remove feed with that index. Maybe it doesn't exist?");
+			}
+		} else if(StringUtils.equalsAnyIgnoreCase(args.get(1), "update-link", "link")) {
+			if(!StringUtils.isNumeric(args.get(2))) {
+				event.getChannel().sendMessage("Please specify a feed number.");
+				return;
+			}
+			if(args.get(3).isBlank()) {
+				event.getChannel().sendMessage("Please specify a link.");
+				return;
+			}
+			try {
+				FeedManager.getFeeds().get(Integer.parseInt(args.get(2)) - 1).url = args.get(3);
+				FeedManager.save();
+			} catch (Exception e) {
+				event.getChannel().sendMessage("Failed to update feed with that index. Maybe it doesn't exist?");
 			}
 		} else if(StringUtils.equalsAnyIgnoreCase(args.get(1), "list", "l")) {
 			event.getChannel().sendMessage(getListEmbed());
@@ -82,7 +99,7 @@ public class CommandRSS extends Command {
 		embed.setTitle("List of RSS Feeds");
 		var feeds = FeedManager.getFeeds();
 		for(var feed : feeds) {
-			embed.addField(String.format("%d: %s", feeds.indexOf(feed), feed.name), String.format("in: %s\n%s", feed.getChannel().getMentionTag(), feed.url));
+			embed.addField(String.format("%d: %s", feeds.indexOf(feed) + 1, feed.name), String.format("in: %s\n%s", feed.getChannel().getMentionTag(), feed.url));
 		}
 		return embed;
 	}

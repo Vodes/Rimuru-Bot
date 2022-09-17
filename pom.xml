@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>pw.vodes</groupId>
 	<artifactId>rimuru</artifactId>
-	<version>0.1.1</version>
+	<version>0.1.2</version>
 	<name>Rimuru</name>
 	<description>Rimuru (Discord, ?) Bot</description>
 	<properties>
