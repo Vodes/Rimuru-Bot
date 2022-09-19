@@ -97,8 +97,8 @@ public class VerificationListener implements ReactionAddListener {
 		var embed = new EmbedBuilder().setTitle(title)
 				.setAuthor(user)
 				.addField("Question", math.getMessage())
-				.addField("Correct Result", "" + math.getResult(), true)
-				.addField("Answer", "" + answer, true)
+				.addField("User's Answer", "" + answer, true)
+				.addField("Correct Answer", "" + math.getResult(), true)
 				.setFooter("UserID: " + user.getIdAsString());
 		
 		if(description != null) {
