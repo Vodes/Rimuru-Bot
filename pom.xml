@@ -61,7 +61,7 @@
 		<dependency>
 			<groupId>com.apptasticsoftware</groupId>
 			<artifactId>rssreader</artifactId>
-			<version>3.0.0</version>
+			<version>3.2.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
 		<dependency>

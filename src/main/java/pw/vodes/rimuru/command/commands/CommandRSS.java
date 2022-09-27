@@ -69,6 +69,7 @@ public class CommandRSS extends Command {
 			try {
 				FeedManager.getFeeds().remove(Integer.parseInt(args.get(2)) - 1);
 				FeedManager.save();
+				event.getChannel().sendMessage("Feed removed.");
 			} catch (Exception e) {
 				event.getChannel().sendMessage("Failed to remove feed with that index. Maybe it doesn't exist?");
 			}
@@ -84,6 +85,7 @@ public class CommandRSS extends Command {
 			try {
 				FeedManager.getFeeds().get(Integer.parseInt(args.get(2)) - 1).url = args.get(3);
 				FeedManager.save();
+				event.getChannel().sendMessage("Link updated.");
 			} catch (Exception e) {
 				event.getChannel().sendMessage("Failed to update feed with that index. Maybe it doesn't exist?");
 			}
