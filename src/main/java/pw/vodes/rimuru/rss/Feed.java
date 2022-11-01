@@ -140,7 +140,10 @@ public class Feed {
 				embed.setUrl(url);
 			
 			embed.setTimestamp(Instant.ofEpochSecond(item.publicationUnixTime()));
-			getChannel().sendMessage(embed).thenRun(() -> item.setWasPosted(true)).exceptionally(ex -> {
+			getChannel().sendMessage(embed).thenAccept(e -> {
+				item.setWasPosted(true);
+				e.crossPost();
+			}).exceptionally(ex -> {
 				Util.reportException(ex, this.getClass().getCanonicalName());
 				return null;
 			});
