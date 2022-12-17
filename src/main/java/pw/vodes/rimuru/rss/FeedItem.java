@@ -2,6 +2,7 @@ package pw.vodes.rimuru.rss;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.regex.Pattern;
 
 import com.apptasticsoftware.rssreader.Item;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -9,51 +10,55 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import pw.vodes.rimuru.Util;
 
 public class FeedItem {
-	
+
 	private boolean wasPosted = false;
 	private String title, author, category, description, guid, link, pubdate;
-	
-	
+
 	@JsonIgnore
 	public String getImage() {
-		if(!this.getDescription().isBlank()) {
+		if (!this.getDescription().isBlank()) {
 			var matcher = Util.imageUrlPattern.matcher(this.getDescription());
-			if(matcher.find()) {
-				return matcher.group();
+			if (matcher.find()) {
+				var url = matcher.group();
+				if (Pattern.matches(Util.u2AttachImagePattern.pattern(), url)) {
+					url = "https://u2.dmhy.org/" + url;
+				}
+				return url;
 			}
 		}
 		return null;
 	}
-	
+
 	@JsonIgnore
 	public long publicationUnixTime() {
-		if(!this.getPubDate().isBlank()) {
+		if (!this.getPubDate().isBlank()) {
 			var time = ZonedDateTime.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(this.getPubDate()));
 			return time.toEpochSecond();
 		}
 		return 0;
 	}
-	
+
 	@JsonIgnore
 	public String getURLToPost() {
-		if(!getLink().isBlank()) {
-			// Return GUID because the link on nyaa rss is the download url for the .torrent file
-			if(this.getLink().toLowerCase().contains("nyaa.si")) {
+		if (!getLink().isBlank()) {
+			// Return GUID because the link on nyaa rss is the download url for the .torrent
+			// file
+			if (this.getLink().toLowerCase().contains("nyaa.si")) {
 				return this.getGuid();
 			}
 			return this.getLink();
-		} 
+		}
 		return "";
 	}
-	
+
 	public boolean wasPosted() {
 		return wasPosted;
 	}
-	
+
 	public void setWasPosted(boolean wasPosted) {
 		this.wasPosted = wasPosted;
 	}
-	
+
 	public static FeedItem ofItem(Item item) {
 		var feeditem = new FeedItem();
 		feeditem.setTitle(item.getTitle().orElse(""));
@@ -65,20 +70,20 @@ public class FeedItem {
 		feeditem.setPubDate(item.getPubDate().get());
 		return feeditem;
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
-		if(o instanceof FeedItem) {
+		if (o instanceof FeedItem) {
 			boolean isU2 = false, sameLink = false, sameTitle = false;
-			if(!getLink().isBlank() && !((FeedItem)o).getLink().isBlank()) {
-				sameLink = getLink().trim().equalsIgnoreCase(((FeedItem)o).getLink());
+			if (!getLink().isBlank() && !((FeedItem) o).getLink().isBlank()) {
+				sameLink = getLink().trim().equalsIgnoreCase(((FeedItem) o).getLink());
 				isU2 = getLink().toLowerCase().contains("u2.dmhy.org");
 			}
-			if(!getTitle().isBlank() && !((FeedItem)o).getTitle().isBlank()) {
-				sameTitle = getTitle().trim().equalsIgnoreCase(((FeedItem)o).getTitle());
+			if (!getTitle().isBlank() && !((FeedItem) o).getTitle().isBlank()) {
+				sameTitle = getTitle().trim().equalsIgnoreCase(((FeedItem) o).getTitle());
 			}
-			
-			if(isU2)
+
+			if (isU2)
 				return sameLink || sameTitle;
 			else
 				return sameLink;
@@ -145,7 +150,5 @@ public class FeedItem {
 	public boolean isWasPosted() {
 		return wasPosted;
 	}
-	
-	
 
 }

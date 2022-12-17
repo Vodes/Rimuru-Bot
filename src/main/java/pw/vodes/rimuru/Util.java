@@ -15,6 +15,7 @@ public class Util {
 	public static SecureRandom random = new SecureRandom();
 	public static final Pattern messageSplitPattern = Pattern.compile("(?=\\S)[^\\\"\\s]*(?:\\\"[^\\\\\\\"]*(?:\\\\[\\s\\S][^\\\\\\\"]*)*\\\"[^\\\"\\s]*)*");
 	public static final Pattern imageUrlPattern = Pattern.compile("[(http(s)?):\\/\\/(www\\.)?a-zA-Z0-9@:%._\\-\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&\\/=]*)(.jpg|.png|.jpeg|.gif)", Pattern.CASE_INSENSITIVE);
+	public static final Pattern u2AttachImagePattern = Pattern.compile("^attachments\\/\\d{6}\\/.*", Pattern.CASE_INSENSITIVE);
 	public static final Pattern u2PasskeyURLPattern = Pattern.compile("https?:\\/\\/u2\\.dmhy\\.org\\/torrentrss\\.php.*(passkey=[^& ]*).*", Pattern.CASE_INSENSITIVE);
 	public static final Pattern nyaaAutismPattern = Pattern.compile("(<.*>)(#\\d*) \\| (.+)(?:<\\/a>) \\| (\\d*\\.\\d* (?:GiB|MiB|TiB)) \\| ([^|]*) \\| (.*)", Pattern.CASE_INSENSITIVE);
 
