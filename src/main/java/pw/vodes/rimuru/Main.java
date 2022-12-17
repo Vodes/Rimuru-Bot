@@ -70,7 +70,7 @@ public class Main {
 	}
 	
 	public static String getVersion() {
-		return "0.1.2";
+		return "0.1.3";
 	}
 	
 	public static FileManager getFiles() {
