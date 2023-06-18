@@ -22,6 +22,8 @@ public class FeedItem {
 				var url = matcher.group();
 				if (Pattern.matches(Util.u2AttachImagePattern.pattern(), url)) {
 					url = "https://u2.dmhy.org/" + url;
+				} else if (url.startsWith("//")) {
+					url = "https:" + url;
 				}
 				return url;
 			}
