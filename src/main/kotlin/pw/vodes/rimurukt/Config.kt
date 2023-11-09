@@ -86,11 +86,12 @@ data class Config(
 
 @Serializable
 data class UpdateConfig(
-    var gitRepo: String = "https://github.com/Vodes/Rimuru-Bot.git",
-    var branch: String = "master",
+    val gitRepo: String = "https://github.com/Vodes/Rimuru-Bot.git",
+    val branch: String = "master",
+    val oauthToken: String = "",
     var currentCommit: String = "",
 
-    var customJvmArgs: String = "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xms1G -Xmx2G",
-    var allowUpdate: Boolean = true,
+    val customJvmArgs: String = "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xms1G -Xmx2G",
+    val allowUpdate: Boolean = true,
     var restartTrigger: String = ""
 )

@@ -2,6 +2,7 @@ package pw.vodes.rimurukt.updater
 
 import kotlinx.serialization.encodeToString
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import org.javacord.api.event.message.MessageCreateEvent
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.reportException
@@ -38,15 +39,16 @@ object Updater {
         var git: Git? = null
         try {
             var msg = event.channel.sendMessage("Cloning repo...").get()
-            git = Git.cloneRepository().setURI(Main.config.updateConfig.gitRepo).setBranch(Main.config.updateConfig.branch).setDirectory(repoDir).call()
+            var gitRequest = Git.cloneRepository().setURI(Main.config.updateConfig.gitRepo).setBranch(Main.config.updateConfig.branch).setDirectory(repoDir)
+            if (Main.config.updateConfig.oauthToken.isNotBlank())
+                gitRequest = gitRequest.setCredentialsProvider(UsernamePasswordCredentialsProvider("token", Main.config.updateConfig.oauthToken))
+            git = gitRequest.call()
 
             val latestCommit = git.log().call().first()
             msg.edit("Repo cloned. Latest commit: `${latestCommit.name}`")
 
             val progress = "Building jar from latest commit..."
             msg = event.channel.sendMessage(progress).get()
-
-            // <=====--------> 42% EXECUTING [1s]
 
             if (!isWin)
                 File(repoDir, "gradlew").setExecutable(true, false)
