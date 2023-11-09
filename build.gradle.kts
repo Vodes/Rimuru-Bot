@@ -17,6 +17,7 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("net.peanuuutz.tomlkt:tomlkt:0.3.7")
     implementation("org.javacord:javacord:3.8.0")
 
     // https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit

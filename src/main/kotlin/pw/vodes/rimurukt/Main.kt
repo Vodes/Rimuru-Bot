@@ -1,5 +1,6 @@
 package pw.vodes.rimurukt
 
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
@@ -24,14 +25,13 @@ object Main {
 
 fun main(args: Array<String>) {
     Main.appDir = if (args.isEmpty()) getAppDir() else File(args[0]).also { it.mkdirs() }
-    val configFile = File(Main.appDir, "config.json")
+    val configFile = File(Main.appDir, "config.toml")
     if (!configFile.exists()) {
-        val test = Config()
-        configFile.writeText(json.encodeToString(test))
+        configFile.writeText(toml.encodeToString(Config()))
         println("Please setup your config at: ${configFile.absolutePath}")
         exitProcess(1)
     }
-    Main.config = json.decodeFromString(configFile.readText())
+    Main.config = toml.decodeFromString(configFile.readText())
     if (Main.config.botToken.isBlank())
         println("No bot token was found in the config!").also { exitProcess(1) }
 

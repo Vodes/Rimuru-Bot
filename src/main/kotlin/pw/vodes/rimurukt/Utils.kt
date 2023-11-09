@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import net.peanuuutz.tomlkt.Toml
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import java.io.File
 import kotlin.math.min
@@ -12,8 +13,12 @@ val json = Json {
     prettyPrint = true
     isLenient = true
     encodeDefaults = true
-    explicitNulls = true
     ignoreUnknownKeys = true
+}
+
+val toml = Toml {
+    ignoreUnknownKeys = true
+    explicitNulls = true
 }
 
 fun getAppDir(): File {
