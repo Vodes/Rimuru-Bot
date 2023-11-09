@@ -63,14 +63,14 @@ object AuditLogs {
         launchThreaded {
             while (true) {
                 checkAuditLogs()
-                delay(1750)
+                delay(2000)
             }
         }
     }
 
     private fun checkAuditLogs() {
         try {
-            val logs = Main.server.getAuditLog(20).join().entries
+            val logs = Main.server.getAuditLog(15).join().entries
             val filtered = logs.filter { it.creationTimestamp.isAfter(Instant.now().minusMillis(if (timeouted) 15 else 7)) && !it.user.get().isYourself }
 
             for (log in filtered) {

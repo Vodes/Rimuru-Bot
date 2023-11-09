@@ -18,6 +18,8 @@ object Main {
     lateinit var api: DiscordApi
     lateinit var server: Server
     lateinit var appDir: File
+
+    const val VERSION = "1.0.0"
 }
 
 fun main(args: Array<String>) {

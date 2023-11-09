@@ -36,7 +36,7 @@ abstract class Command(val name: String, @Transient val alias: Array<String> = a
 }
 
 object Commands {
-    private val commands = mutableListOf<Command>()
+    val commands = mutableListOf<Command>()
 
     fun load() {
         commands.add(CommandHelp())
