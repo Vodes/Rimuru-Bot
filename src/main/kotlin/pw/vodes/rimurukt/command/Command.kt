@@ -6,6 +6,8 @@ import org.javacord.api.entity.user.User
 import org.javacord.api.event.message.MessageCreateEvent
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.command.commands.CommandHelp
+import pw.vodes.rimurukt.command.commands.CommandRestart
+import pw.vodes.rimurukt.command.commands.CommandUpdate
 
 enum class CommandType {
     EVERYONE, MOD, ADMIN
@@ -40,6 +42,8 @@ object Commands {
 
     fun load() {
         commands.add(CommandHelp())
+        commands.add(CommandUpdate())
+        commands.add(CommandRestart())
     }
 
     fun tryRunCommand(event: MessageCreateEvent) {
