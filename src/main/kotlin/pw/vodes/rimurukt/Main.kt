@@ -6,6 +6,7 @@ import org.javacord.api.DiscordApiBuilder
 import org.javacord.api.entity.activity.ActivityType
 import org.javacord.api.entity.server.Server
 import pw.vodes.rimurukt.audit.AuditLogs
+import pw.vodes.rimurukt.command.Commands
 import pw.vodes.rimurukt.file.AutoMod
 import pw.vodes.rimurukt.file.AutoRoles
 import pw.vodes.rimurukt.listeners.MemberListeners
@@ -50,5 +51,7 @@ fun main(args: Array<String>) {
     Main.server.addServerMemberJoinListener(MemberListeners.JoinListener())
     Main.server.addServerMemberLeaveListener(MemberListeners.LeaveListener())
 
+    Commands.load()
+    Main.server.addMessageCreateListener { Commands.tryRunCommand(it) }
 }
 

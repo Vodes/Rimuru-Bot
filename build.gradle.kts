@@ -1,9 +1,8 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    kotlin("jvm") version "1.9.10"
-    kotlin("plugin.serialization") version "1.9.10"
+    kotlin("jvm") version "1.9.20"
+    kotlin("plugin.serialization") version "1.9.20"
     application
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "pw.vodes"
@@ -52,8 +51,11 @@ dependencies {
     // testImplementation(kotlin("test"))
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
+kotlin {
+    if (System.getProperty("os.name").startsWith("win", true))
+        jvmToolchain(17)
+    else
+        jvmToolchain(11)
 }
 
 application {

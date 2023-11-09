@@ -4,7 +4,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import org.javacord.api.entity.message.embed.EmbedBuilder
 import java.io.File
+import kotlin.math.min
 
 val json = Json {
     prettyPrint = true
@@ -29,7 +31,6 @@ fun getAppDir(): File {
     }
 }
 
-
 fun launchThreaded(run: suspend CoroutineScope.() -> Unit): Pair<Job, CoroutineScope> {
     val job = Job()
     val scope = CoroutineScope(job)
@@ -37,4 +38,22 @@ fun launchThreaded(run: suspend CoroutineScope.() -> Unit): Pair<Job, CoroutineS
         run()
     }
     return Pair(job, scope)
+}
+
+fun reportException(ex: Throwable, source: String? = null) {
+    var stacktrace = ex.stackTraceToString()
+    var message = ex.localizedMessage
+    try {
+        println(stacktrace)
+
+        val trimmed = stacktrace.subSequence(stacktrace.indexOf("\n") + 1, min(stacktrace.length, 1200))
+        val description = if (trimmed.contains("pw.vodes.rimurukt")) "${message}\n```\n$trimmed```" else message
+        val embed = EmbedBuilder().setTitle("Exception thrown!")
+            .setDescription(description)
+        if (!source.isNullOrBlank())
+            embed.setFooter("Source: $source")
+        Main.config.otherLogChannel()?.sendMessage(embed)
+    } catch (_: Exception) {
+        // Shouldn't run into this
+    }
 }

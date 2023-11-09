@@ -2,7 +2,9 @@ package pw.vodes.rimurukt.command
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.javacord.api.entity.user.User
 import org.javacord.api.event.message.MessageCreateEvent
+import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.command.commands.CommandHelp
 
 enum class CommandType {
@@ -38,5 +40,43 @@ object Commands {
 
     fun load() {
         commands.add(CommandHelp())
+    }
+
+    fun tryRunCommand(event: MessageCreateEvent) {
+        val content = event.messageContent
+        commands.forEach {
+            if (!it.enabled)
+                return@forEach
+
+            for (alias in it.alias) {
+                if (content.startsWith("${Main.config.commandPrefix}$alias", true)
+                    && hasPerms(it, event.messageAuthor.asUser().get())
+                ) {
+                    it.run(event)
+                    return
+                }
+            }
+        }
+    }
+
+    private fun hasPerms(cmd: Command, user: User): Boolean {
+        if (Main.server.isAdmin(user) || user.id == Main.api.getOwnerId().orElse(0L))
+            return true
+
+        when (cmd.type) {
+            CommandType.EVERYONE -> {
+                return true
+            }
+
+            CommandType.MOD -> {
+                Main.config.modRoles().forEach {
+                    if (it.hasUser(user))
+                        return true
+                }
+                return false
+            }
+
+            else -> return false
+        }
     }
 }
