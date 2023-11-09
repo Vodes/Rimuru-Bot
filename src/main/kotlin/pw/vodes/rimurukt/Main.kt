@@ -11,6 +11,7 @@ import pw.vodes.rimurukt.command.Commands
 import pw.vodes.rimurukt.file.AutoMod
 import pw.vodes.rimurukt.file.AutoRoles
 import pw.vodes.rimurukt.listeners.MemberListeners
+import pw.vodes.rimurukt.updater.Updater
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -20,18 +21,20 @@ object Main {
     lateinit var server: Server
     lateinit var appDir: File
 
+    lateinit var configFile: File
+
     const val VERSION = "1.0.0"
 }
 
 fun main(args: Array<String>) {
     Main.appDir = if (args.isEmpty()) getAppDir() else File(args[0]).also { it.mkdirs() }
-    val configFile = File(Main.appDir, "config.toml")
-    if (!configFile.exists()) {
-        configFile.writeText(toml.encodeToString(Config()))
-        println("Please setup your config at: ${configFile.absolutePath}")
+    Main.configFile = File(Main.appDir, "config.toml")
+    if (!Main.configFile.exists()) {
+        Main.configFile.writeText(toml.encodeToString(Config()))
+        println("Please setup your config at: ${Main.configFile.absolutePath}")
         exitProcess(1)
     }
-    Main.config = toml.decodeFromString(configFile.readText())
+    Main.config = toml.decodeFromString(Main.configFile.readText())
     if (Main.config.botToken.isBlank())
         println("No bot token was found in the config!").also { exitProcess(1) }
 
@@ -43,6 +46,12 @@ fun main(args: Array<String>) {
     Main.api.updateActivity(ActivityType.PLAYING, "${Main.config.commandPrefix}help")
     Main.server = Main.api.servers.first()
     LogRepeater.start()
+    initServices()
+}
+
+fun initServices() {
+    Updater.init()
+    Updater.postRestart()
 
     AutoRoles.load()
     AutoMod.load()
