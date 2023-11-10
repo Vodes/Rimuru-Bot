@@ -8,8 +8,10 @@ import org.javacord.api.interaction.SlashCommandBuilder
 import org.javacord.api.interaction.SlashCommandInteraction
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.command.commands.CommandHelp
+import pw.vodes.rimurukt.command.commands.CommandKick
 import pw.vodes.rimurukt.command.commands.CommandRestart
 import pw.vodes.rimurukt.command.commands.CommandUpdate
+import pw.vodes.rimurukt.reply
 
 enum class CommandType {
     EVERYONE, MOD, ADMIN
@@ -57,6 +59,7 @@ object Commands {
         commands.add(CommandHelp())
         commands.add(CommandUpdate())
         commands.add(CommandRestart())
+        commands.add(CommandKick())
 
         val builders = hashSetOf<SlashCommandBuilder>()
         commands.forEach {
@@ -69,6 +72,8 @@ object Commands {
                 return@addSlashCommandCreateListener
             commands.forEach { cmd ->
                 if (it.slashCommandInteraction.commandName.equals(cmd.slashCommandName, true)) {
+                    if (!hasPerms(cmd, it.slashCommandInteraction.user))
+                        it.slashCommandInteraction.reply("You don't have permissions to run this command.").also { return@addSlashCommandCreateListener }
                     cmd.runSlashCommand(it.slashCommandInteraction)
                     return@addSlashCommandCreateListener
                 }
@@ -94,7 +99,7 @@ object Commands {
         }
     }
 
-    private fun hasPerms(cmd: Command, user: User): Boolean {
+    fun hasPerms(cmd: Command, user: User): Boolean {
         if (Main.server.isAdmin(user) || user.id == Main.api.getOwnerId().orElse(0L))
             return true
 
