@@ -56,7 +56,7 @@ fun initServices() {
     AutoRoles.load()
     AutoMod.load()
     Main.server.addMessageCreateListener(AutoMod.automodCreateListener())
-    Main.server.addMessageEditListener(AutoMod.automodEditListener())
+    //Main.server.addMessageEditListener(AutoMod.automodEditListener())
 
     AuditLogs.start()
     Main.server.addServerMemberJoinListener(MemberListeners.JoinListener())

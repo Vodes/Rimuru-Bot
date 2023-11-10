@@ -4,6 +4,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.javacord.api.entity.user.User
 import org.javacord.api.event.message.MessageCreateEvent
+import org.javacord.api.interaction.SlashCommandBuilder
+import org.javacord.api.interaction.SlashCommandInteraction
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.command.commands.CommandHelp
 import pw.vodes.rimurukt.command.commands.CommandRestart
@@ -14,13 +16,24 @@ enum class CommandType {
 }
 
 @Serializable
-abstract class Command(val name: String, @Transient val alias: Array<String> = arrayOf(), @Transient val type: CommandType = CommandType.EVERYONE) {
+abstract class Command(
+    val name: String,
+    @Transient val alias: Array<String> = arrayOf(),
+    @Transient val type: CommandType = CommandType.EVERYONE,
+    @Transient val slashCommandName: String? = null
+) {
     @Transient
     var usage: String? = null
 
     var enabled: Boolean = true
 
     abstract fun run(event: MessageCreateEvent)
+
+    open fun getSlashCommandBuilder(): SlashCommandBuilder? = null
+
+    open fun runSlashCommand(interaction: SlashCommandInteraction) {
+        interaction.createImmediateResponder().respond()
+    }
 
     fun args(event: MessageCreateEvent): List<String> {
         val list = mutableListOf<String>()
@@ -44,6 +57,24 @@ object Commands {
         commands.add(CommandHelp())
         commands.add(CommandUpdate())
         commands.add(CommandRestart())
+
+        val builders = hashSetOf<SlashCommandBuilder>()
+        commands.forEach {
+            val builder = it.getSlashCommandBuilder() ?: return@forEach
+            builders.add(builder)
+        }
+        Main.api.bulkOverwriteServerApplicationCommands(Main.server, builders)
+        Main.api.addSlashCommandCreateListener {
+            if (it.slashCommandInteraction.applicationId != Main.api.yourself.id)
+                return@addSlashCommandCreateListener
+            commands.forEach { cmd ->
+                if (it.slashCommandInteraction.commandName.equals(cmd.slashCommandName, true)) {
+                    cmd.runSlashCommand(it.slashCommandInteraction)
+                    return@addSlashCommandCreateListener
+                }
+            }
+            it.slashCommandInteraction.createImmediateResponder().respond()
+        }
     }
 
     fun tryRunCommand(event: MessageCreateEvent) {

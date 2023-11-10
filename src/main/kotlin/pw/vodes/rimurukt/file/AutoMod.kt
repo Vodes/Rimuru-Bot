@@ -12,6 +12,7 @@ import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.json
 import java.io.File
 import java.time.Duration
+import kotlin.jvm.optionals.getOrNull
 
 @Serializable
 data class AutoModEntry(var filteredSequence: String, var punishment: Punishment?, var punishmentVal: String)
@@ -56,10 +57,11 @@ object AutoMod {
 
     private fun checkMessage(message: Message, author: MessageAuthor, content: String) {
         var isStaff = author.isServerAdmin
+        val user = author.asUser().getOrNull() ?: return
         Main.config.modRoles().forEach {
             if (isStaff)
                 return@forEach
-            isStaff = it.hasUser(author.asUser().get())
+            isStaff = it.hasUser(user)
         }
         if (isStaff || excludedChannels.find { it.id == message.channel.id } != null)
             return
@@ -76,7 +78,7 @@ object AutoMod {
             } else {
                 when (automod.punishment!!) {
                     Punishment.KICK -> {
-                        Main.server.kickUser(author.asUser().get(), "Automod")
+                        Main.server.kickUser(user, "Automod")
                         message.delete()
                         embed.setDescription("Kicked & Message deleted:\n```$content```")
                     }
@@ -88,7 +90,7 @@ object AutoMod {
                     }
 
                     Punishment.TIMEOUT -> {
-                        Main.server.timeoutUser(author.asUser().get(), Duration.ofMinutes(automod.punishmentVal.toLong()), "Automod")
+                        Main.server.timeoutUser(user, Duration.ofMinutes(automod.punishmentVal.toLong()), "Automod")
                         message.delete()
                         embed.setDescription("Timeouted & Message deleted:\n```$content```")
                     }
