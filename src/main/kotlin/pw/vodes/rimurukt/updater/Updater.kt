@@ -111,7 +111,7 @@ object Updater {
         try {
             // This can't run in the background on windows because windows things, but I guess it works
             if (isWin)
-                Runtime.getRuntime().exec("cmd /c start java ${Main.config.updateConfig.customJvmArgs} -jar \"${jarFile.absolutePath}\"")
+                Runtime.getRuntime().exec("cmd /c start $command")
             else
                 ProcessBuilder(listOf("bash", "-c", command)).start()
             exitProcess(0)
