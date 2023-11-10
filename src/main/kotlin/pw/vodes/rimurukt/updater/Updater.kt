@@ -84,6 +84,9 @@ object Updater {
                 return false
             if (jarFile.extension.equals("jar", true)) {
                 Files.move(builtJar!!.toPath(), jarFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            } else if (jarFile.isDirectory) {
+                jarFile = File(jarFile, builtJar!!.name)
+                Files.move(builtJar!!.toPath(), jarFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
             }
             event.channel.sendMessage("Moved finished build. Restarting...")
 
@@ -104,10 +107,11 @@ object Updater {
         val isWin = isWin()
         var command = "screen -dmS Rimuru bash -c 'sleep 2; java ${Main.config.updateConfig.customJvmArgs} -jar \"${jarFile.absolutePath}\"'"
         if (isWin)
-            command = "timeout 2 >nul & java ${Main.config.updateConfig.customJvmArgs} -jar \"${jarFile.absolutePath}\""
+            command = "java ${Main.config.updateConfig.customJvmArgs} -jar \"${jarFile.absolutePath}\""
         try {
+            // This can't run in the background on windows because windows things, but I guess it works
             if (isWin)
-                ProcessBuilder(listOf("cmd", "/c", "start", command)).start()
+                Runtime.getRuntime().exec("cmd /c start java ${Main.config.updateConfig.customJvmArgs} -jar \"${jarFile.absolutePath}\"")
             else
                 ProcessBuilder(listOf("bash", "-c", command)).start()
             exitProcess(0)
