@@ -16,10 +16,10 @@ import pw.vodes.rimurukt.reply
 import java.util.concurrent.TimeUnit
 import kotlin.jvm.optionals.getOrNull
 
-class CommandKick : Command("Kick", arrayOf("kick"), CommandType.MOD, "kick") {
+class CommandBan : Command("Ban", arrayOf("ban"), CommandType.MOD, "ban") {
 
     init {
-        usage = "`${Main.config.commandPrefix}kick <user_id/mentioned users> \"reason for kick\"`"
+        usage = "`${Main.config.commandPrefix}ban <user_id/mentioned users> \"reason for ban\"`"
     }
 
     override fun run(event: MessageCreateEvent) {
@@ -31,42 +31,42 @@ class CommandKick : Command("Kick", arrayOf("kick"), CommandType.MOD, "kick") {
             event.channel.sendMessage("No valid users were passed.").also { return }
 
         users.forEach {
-            if (!canKickOrBan(event.messageAuthor.asUser().get(), it, event.server.get())) {
-                event.channel.sendMessage("Cannot kick ${it.name}.").deleteAfter(8)
+            if (!canKickOrBan(event.messageAuthor.asUser().get(), it, event.server.get(), false)) {
+                event.channel.sendMessage("Cannot ban ${it.name}.").deleteAfter(8)
             } else {
-                event.server.get().kickUser(it).join()
+                event.server.get().banUser(it).join()
             }
         }
         event.message.deleteAfter(1, TimeUnit.SECONDS)
     }
 
     override fun getSlashCommandBuilder() = SlashCommandBuilder()
-        .setName("kick")
-        .setDescription("Kicks users from the server.")
+        .setName("ban")
+        .setDescription("Bans users from the server.")
         .setEnabledInDms(false)
-        .addOption(SlashCommandOption.createUserOption("user", "User to kick", true))
-        .addOption(SlashCommandOption.createStringOption("reason", "Reason for kicking", false))
+        .addOption(SlashCommandOption.createUserOption("user", "User to ban", true))
+        .addOption(SlashCommandOption.createStringOption("reason", "Reason for banning", false))
 
     override fun runSlashCommand(interaction: SlashCommandInteraction) {
         val target = interaction.arguments[0].userValue.get()
         val server = interaction.server.getOrNull() ?: Main.server
 
-        if (!canKickOrBan(interaction.user, target, server))
-            interaction.reply("Cannot kick this user.", true).also { return }
+        if (!canKickOrBan(interaction.user, target, server, false))
+            interaction.reply("Cannot ban this user.", true).also { return }
 
-        server.kickUser(target).thenAccept {
-            interaction.reply("User kicked.", true)
+        server.banUser(target).thenAccept {
+            interaction.reply("User banned.", true)
             AuditLogs.registerStaffAction(
                 StaffAction(
                     target.idAsString,
                     interaction.user.idAsString,
                     epochSecond(),
-                    StaffActionType.KICK,
+                    StaffActionType.BAN,
                     interaction.arguments.getOrNull(1)?.stringValue?.orElse("") ?: ""
                 )
             )
         }.exceptionally {
-            interaction.reply("Failed to kick user. Please check the logs.", true)
+            interaction.reply("Failed to ban user. Please check the logs.", true)
             null
         }
     }

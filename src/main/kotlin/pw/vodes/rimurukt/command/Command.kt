@@ -2,15 +2,13 @@ package pw.vodes.rimurukt.command
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.javacord.api.entity.server.Server
 import org.javacord.api.entity.user.User
 import org.javacord.api.event.message.MessageCreateEvent
 import org.javacord.api.interaction.SlashCommandBuilder
 import org.javacord.api.interaction.SlashCommandInteraction
 import pw.vodes.rimurukt.Main
-import pw.vodes.rimurukt.command.commands.CommandHelp
-import pw.vodes.rimurukt.command.commands.CommandKick
-import pw.vodes.rimurukt.command.commands.CommandRestart
-import pw.vodes.rimurukt.command.commands.CommandUpdate
+import pw.vodes.rimurukt.command.commands.*
 import pw.vodes.rimurukt.reply
 
 enum class CommandType {
@@ -50,6 +48,26 @@ abstract class Command(
 
         return list.toList()
     }
+
+    fun listedUsers(content: String): List<User> {
+        val users = mutableListOf<User>()
+        for (match in "(?:<@)?(\\d{17,20})(?:>)?".toRegex().findAll(content)) {
+            Main.api.getUserById(match.groups[0]!!.value).thenAccept {
+                users.add(it)
+            }
+        }
+        return users.toList()
+    }
+
+    internal fun canKickOrBan(user: User, target: User, server: Server, kick: Boolean = true): Boolean {
+        val isModOrAdmin = Main.config.modRoles().find { it.hasUser(target) } != null || server.isAdmin(target)
+        if (isModOrAdmin && !user.isBotOwner && !server.isOwner(user))
+            return false
+        if (target.isYourself || target.isBotOwner)
+            return false
+
+        return if (kick) server.canKickUser(Main.api.yourself, target) else server.canBanUser(Main.api.yourself, target)
+    }
 }
 
 object Commands {
@@ -60,6 +78,7 @@ object Commands {
         commands.add(CommandUpdate())
         commands.add(CommandRestart())
         commands.add(CommandKick())
+        commands.add(CommandBan())
 
         val builders = hashSetOf<SlashCommandBuilder>()
         commands.forEach {
