@@ -1,4 +1,4 @@
-package pw.vodes.rimurukt.file
+package pw.vodes.rimurukt.services
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient

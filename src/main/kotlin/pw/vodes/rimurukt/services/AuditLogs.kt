@@ -1,4 +1,4 @@
-package pw.vodes.rimurukt.audit
+package pw.vodes.rimurukt.services
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

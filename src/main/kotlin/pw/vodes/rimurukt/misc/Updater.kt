@@ -1,4 +1,4 @@
-package pw.vodes.rimurukt.updater
+package pw.vodes.rimurukt.misc
 
 import kotlinx.serialization.encodeToString
 import org.eclipse.jgit.api.Git

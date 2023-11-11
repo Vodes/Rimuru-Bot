@@ -1,4 +1,4 @@
-package pw.vodes.rimurukt.audit
+package pw.vodes.rimurukt.services
 
 import kotlinx.serialization.Serializable
 import org.javacord.api.entity.message.embed.EmbedBuilder

@@ -1,4 +1,4 @@
-package pw.vodes.rimurukt.listeners
+package pw.vodes.rimurukt.misc
 
 import kotlinx.coroutines.delay
 import org.javacord.api.entity.message.embed.EmbedBuilder
@@ -6,7 +6,7 @@ import org.javacord.api.entity.user.User
 import org.javacord.api.listener.server.member.ServerMemberJoinListener
 import org.javacord.api.listener.server.member.ServerMemberLeaveListener
 import pw.vodes.rimurukt.*
-import pw.vodes.rimurukt.audit.AuditLogs
+import pw.vodes.rimurukt.services.AuditLogs
 
 object MemberListeners {
 

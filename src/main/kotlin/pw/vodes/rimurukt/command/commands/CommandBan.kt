@@ -5,14 +5,14 @@ import org.javacord.api.interaction.SlashCommandBuilder
 import org.javacord.api.interaction.SlashCommandInteraction
 import org.javacord.api.interaction.SlashCommandOption
 import pw.vodes.rimurukt.Main
-import pw.vodes.rimurukt.audit.AuditLogs
-import pw.vodes.rimurukt.audit.StaffAction
-import pw.vodes.rimurukt.audit.StaffActionType
 import pw.vodes.rimurukt.command.Command
 import pw.vodes.rimurukt.command.CommandType
 import pw.vodes.rimurukt.deleteAfter
 import pw.vodes.rimurukt.epochSecond
 import pw.vodes.rimurukt.reply
+import pw.vodes.rimurukt.services.AuditLogs
+import pw.vodes.rimurukt.services.StaffAction
+import pw.vodes.rimurukt.services.StaffActionType
 import java.util.concurrent.TimeUnit
 import kotlin.jvm.optionals.getOrNull
 

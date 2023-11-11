@@ -4,7 +4,7 @@ import org.javacord.api.event.message.MessageCreateEvent
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.command.Command
 import pw.vodes.rimurukt.command.CommandType
-import pw.vodes.rimurukt.updater.Updater
+import pw.vodes.rimurukt.misc.Updater
 
 class CommandUpdate : Command("Update", arrayOf("update"), CommandType.ADMIN) {
     override fun run(event: MessageCreateEvent) {
