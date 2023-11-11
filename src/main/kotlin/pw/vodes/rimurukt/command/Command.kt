@@ -1,7 +1,7 @@
 package pw.vodes.rimurukt.command
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
+import kotlinx.serialization.encodeToString
 import org.javacord.api.entity.server.Server
 import org.javacord.api.entity.user.User
 import org.javacord.api.event.message.MessageCreateEvent
@@ -9,20 +9,23 @@ import org.javacord.api.interaction.SlashCommandBuilder
 import org.javacord.api.interaction.SlashCommandInteraction
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.command.commands.*
+import pw.vodes.rimurukt.json
 import pw.vodes.rimurukt.reply
+import java.io.File
 
 enum class CommandType {
     EVERYONE, MOD, ADMIN
 }
 
 @Serializable
+data class CommandStatus(val name: String, var enabled: Boolean)
+
 abstract class Command(
     val name: String,
-    @Transient val alias: Array<String> = arrayOf(),
-    @Transient val type: CommandType = CommandType.EVERYONE,
-    @Transient val slashCommandName: String? = null
+    val alias: Array<String> = arrayOf(),
+    val type: CommandType = CommandType.EVERYONE,
+    val slashCommandName: String? = null
 ) {
-    @Transient
     var usage: String? = null
 
     var enabled: Boolean = true
@@ -46,18 +49,22 @@ abstract class Command(
             list.add(s.replace("\\\"", "\""))
         }
 
+        (1..10).forEach { list.add("") }
+
         return list.toList()
     }
 
     fun listedUsers(content: String): List<User> {
         val users = mutableListOf<User>()
-        for (match in "(?:<@)?(\\d{17,20})(?:>)?".toRegex().findAll(content)) {
-            Main.api.getUserById(match.groups[0]!!.value).thenAccept {
+        for (match in "<?@?(\\d{17,20})>?".toRegex().findAll(content)) {
+            Main.api.getUserById(match.groups[1]!!.value).thenAccept {
                 users.add(it)
             }
         }
         return users.toList()
     }
+
+    fun getStatus(): CommandStatus = CommandStatus(this.name, this.enabled)
 
     internal fun canKickOrBan(user: User, target: User, server: Server, kick: Boolean = true): Boolean {
         val isModOrAdmin = Main.config.modRoles().find { it.hasUser(target) } != null || server.isAdmin(target)
@@ -71,6 +78,7 @@ abstract class Command(
 }
 
 object Commands {
+    private val statusFile = File(Main.appDir, "commands.json")
     val commands = mutableListOf<Command>()
 
     fun load() {
@@ -91,6 +99,8 @@ object Commands {
                 return@addSlashCommandCreateListener
             commands.forEach { cmd ->
                 if (it.slashCommandInteraction.commandName.equals(cmd.slashCommandName, true)) {
+                    if (!cmd.enabled)
+                        it.slashCommandInteraction.reply("This command is currently disabled!").also { return@addSlashCommandCreateListener }
                     if (!hasPerms(cmd, it.slashCommandInteraction.user))
                         it.slashCommandInteraction.reply("You don't have permissions to run this command.").also { return@addSlashCommandCreateListener }
                     cmd.runSlashCommand(it.slashCommandInteraction)
@@ -99,18 +109,31 @@ object Commands {
             }
             it.slashCommandInteraction.createImmediateResponder().respond()
         }
+
+        if (statusFile.exists()) {
+            for (status in json.decodeFromString<List<CommandStatus>>(statusFile.readText())) {
+                val cmd = commands.find { it.name == status.name }
+                if (cmd != null)
+                    cmd.enabled = status.enabled
+            }
+        }
+    }
+
+    fun save() {
+        statusFile.writeText(json.encodeToString(commands.map { it.getStatus() }))
     }
 
     fun tryRunCommand(event: MessageCreateEvent) {
         val content = event.messageContent
         commands.forEach {
-            if (!it.enabled)
-                return@forEach
-
             for (alias in it.alias) {
                 if (content.startsWith("${Main.config.commandPrefix}$alias", true)
                     && hasPerms(it, event.messageAuthor.asUser().get())
                 ) {
+                    if (!it.enabled) {
+                        event.channel.sendMessage("This command is currently disabled!")
+                        return
+                    }
                     it.run(event)
                     return
                 }
@@ -118,7 +141,7 @@ object Commands {
         }
     }
 
-    fun hasPerms(cmd: Command, user: User): Boolean {
+    private fun hasPerms(cmd: Command, user: User): Boolean {
         if (Main.server.isAdmin(user) || user.id == Main.api.getOwnerId().orElse(0L))
             return true
 

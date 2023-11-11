@@ -64,5 +64,6 @@ fun initServices() {
 
     Commands.load()
     Main.server.addMessageCreateListener { Commands.tryRunCommand(it) }
+    Commands.save()
 }
 
