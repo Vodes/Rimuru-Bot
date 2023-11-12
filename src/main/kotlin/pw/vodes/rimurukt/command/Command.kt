@@ -92,6 +92,7 @@ object Commands {
         commands.add(CommandAutomod())
         commands.add(CommandAutorole())
         commands.add(CommandUserInfo())
+        commands.add(CommandRSS())
 
         updateSlashCommands()
 

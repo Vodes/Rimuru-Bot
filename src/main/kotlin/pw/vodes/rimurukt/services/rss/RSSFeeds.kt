@@ -14,7 +14,8 @@ object RSSFeeds {
     var feeds = mutableListOf<Feed>()
 
     fun load() {
-        feeds = json.decodeFromString(file.readText())
+        if (file.exists())
+            feeds = json.decodeFromString(file.readText())
         start()
     }
 
@@ -32,6 +33,7 @@ object RSSFeeds {
                     } catch (ex: Exception) {
                         reportException(ex, "Failed to check feed in main loop: ${it.name}")
                     }
+                    save()
                     delay(30000)
                 }
                 delay(600000)

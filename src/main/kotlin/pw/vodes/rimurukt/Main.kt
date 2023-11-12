@@ -62,11 +62,12 @@ fun initServices() {
     AuditLogs.start()
     Main.server.addServerMemberJoinListener(MemberListeners.JoinListener())
     Main.server.addServerMemberLeaveListener(MemberListeners.LeaveListener())
+    
+    RSSFeeds.load()
 
     Commands.load()
     Main.server.addMessageCreateListener { Commands.tryRunCommand(it) }
     Commands.save()
 
-    RSSFeeds.load()
 }
 
