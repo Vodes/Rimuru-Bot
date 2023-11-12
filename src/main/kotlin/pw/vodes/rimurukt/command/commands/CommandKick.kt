@@ -23,8 +23,11 @@ class CommandKick : Command("Kick", arrayOf("kick"), CommandType.MOD, "kick") {
     }
 
     override fun run(event: MessageCreateEvent) {
-        if (args(event)[1].isEmpty())
+        val args = args(event).toMutableList()
+        if (args[1].isEmpty())
             event.channel.sendMessage(usage).also { return }
+
+        args.removeAt(0)
 
         val users = listedUsers(event.messageContent)
         if (users.isEmpty())
@@ -34,7 +37,17 @@ class CommandKick : Command("Kick", arrayOf("kick"), CommandType.MOD, "kick") {
             if (!canKickOrBan(event.messageAuthor.asUser().get(), it, event.server.get())) {
                 event.channel.sendMessage("Cannot kick ${it.name}.").deleteAfter(8)
             } else {
-                event.server.get().kickUser(it).join()
+                event.server.get().kickUser(it).thenAccept { _ ->
+                    AuditLogs.registerStaffAction(
+                        StaffAction(
+                            it.idAsString,
+                            event.messageAuthor.idAsString,
+                            epochSecond(),
+                            StaffActionType.KICK,
+                            args.find { s -> !s.matches("<?@?(\\d{17,20})>?".toRegex()) } ?: ""
+                        )
+                    )
+                }
             }
         }
         event.message.deleteAfter(1, TimeUnit.SECONDS)
