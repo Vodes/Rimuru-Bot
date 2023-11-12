@@ -6,13 +6,14 @@ import org.javacord.api.entity.server.Server
 import org.javacord.api.interaction.*
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.command.Command
+import pw.vodes.rimurukt.command.CommandType
 import pw.vodes.rimurukt.command.Commands
 import pw.vodes.rimurukt.eqI
 import pw.vodes.rimurukt.reply
 import pw.vodes.rimurukt.services.AutoRoles
 import kotlin.jvm.optionals.getOrNull
 
-class CommandAutorole : Command("autorole", slashCommandName = "autorole") {
+class CommandAutorole : Command("autorole", type = CommandType.ADMIN, slashCommandName = "autorole") {
 
     override fun getSlashCommandBuilder(): SlashCommandBuilder? {
         val builder = SlashCommandBuilder()
