@@ -90,6 +90,7 @@ object Commands {
         commands.add(CommandKick())
         commands.add(CommandBan())
         commands.add(CommandAutomod())
+        commands.add(CommandAutorole())
 
         val builders = hashSetOf<SlashCommandBuilder>()
         commands.forEach {
@@ -129,7 +130,7 @@ object Commands {
     fun tryRunCommand(event: MessageCreateEvent) {
         val content = event.messageContent
         commands.forEach {
-            for (alias in it.alias) {
+            for (alias in it.alias.toSet().apply { this.plus(it.name) }) {
                 if (content.startsWith("${Main.config.commandPrefix}$alias", true)
                     && hasPerms(it, event.messageAuthor.asUser().get())
                 ) {

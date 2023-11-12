@@ -27,7 +27,7 @@ data class AutoRole(val serverID: String, val channelID: String, val messageID: 
         return Main.api.getServerById(this.serverID).getOrNull()
     }
 
-    private fun channel(): ServerTextChannel? {
+    fun channel(): ServerTextChannel? {
         return server()?.getTextChannelById(channelID)?.getOrNull()
     }
 
@@ -43,7 +43,7 @@ data class AutoRole(val serverID: String, val channelID: String, val messageID: 
 
 object AutoRoles {
     private val file = File(Main.appDir, "autoroles.json")
-    private var autoroles = mutableListOf<AutoRole>()
+    var autoroles = mutableListOf<AutoRole>()
 
     fun load() {
         if (file.exists())
@@ -59,7 +59,7 @@ object AutoRoles {
         }
     }
 
-    private fun save() {
+    fun save() {
         file.writeText(json.encodeToString(autoroles))
     }
 
@@ -94,7 +94,7 @@ object AutoRoles {
 
             message.addReactionAddListener(ReactionAddListener { event ->
                 val user = event.user.getOrNull() ?: return@ReactionAddListener
-                if (role.hasUser(user))
+                if (!role.hasUser(user))
                     role.addUser(user)
             }.also { autoRole.reactionAddListener = it })
 
