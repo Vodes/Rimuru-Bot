@@ -91,6 +91,7 @@ object Commands {
         commands.add(CommandBan())
         commands.add(CommandAutomod())
         commands.add(CommandAutorole())
+        commands.add(CommandUserInfo())
 
         updateSlashCommands()
 
@@ -134,6 +135,8 @@ object Commands {
 
     fun tryRunCommand(event: MessageCreateEvent) {
         val content = event.messageContent
+        if (event.messageAuthor.isBotUser)
+            return
         commands.forEach {
             for (alias in it.alias.toSet().apply { this.plus(it.name) }) {
                 if (content.startsWith("${Main.config.commandPrefix}$alias", true)

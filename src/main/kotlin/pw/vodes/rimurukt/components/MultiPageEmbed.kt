@@ -30,6 +30,13 @@ class MultiPageEmbed(private val user: User, private val ownerOnly: Boolean = fa
         return this
     }
 
+    private fun currentPage(): EmbedBuilder {
+        val embed = pages[current]
+        if (pages.size > 1)
+            embed.setFooter("Page %02d / %02d".format(current + 1, pages.size))
+        return embed
+    }
+
     init {
         pages.add(first(EmbedBuilder()))
     }
@@ -67,7 +74,11 @@ class MultiPageEmbed(private val user: User, private val ownerOnly: Boolean = fa
     }
 
     fun sendAsResponse(interaction: SlashCommandInteraction) {
-        val embed = pages[current].setFooter("Page %02d / %02d".format(current + 1, pages.size))
+        val embed = currentPage()
+        if (pages.size < 2) {
+            interaction.createImmediateResponder().addEmbed(embed).respond()
+            return
+        }
         val (prevID, nextID) = arrayOf("prev-${interaction.id}", "next-${interaction.id}")
         val response = interaction.createImmediateResponder()
             .addComponents(
@@ -94,13 +105,17 @@ class MultiPageEmbed(private val user: User, private val ownerOnly: Boolean = fa
     }
 
     fun sendMessage(event: MessageCreateEvent) {
-        val embed = pages[current].setFooter("Page %02d / %02d".format(current + 1, pages.size))
+        val embed = currentPage()
+        if (pages.size < 2) {
+            event.channel.sendMessage(embed)
+            return
+        }
         val (prevID, nextID) = arrayOf("prev-${event.messageId}", "next-${event.messageId}")
         val prevButton = Button.primary(prevID, "⬅")
         val nextButton = Button.primary(nextID, "➡")
         val message = MessageBuilder().setEmbed(embed).addActionRow(prevButton, nextButton).send(event.channel).get()
         message.addButtonClickListener(getClickListener(prevID, nextID) {
-            MessageUpdater(message).setEmbed(pages[current].setFooter("Page %02d / %02d".format(current + 1, pages.size))).applyChanges()
+            MessageUpdater(message).setEmbed(currentPage()).applyChanges()
         }).removeAfter(60, TimeUnit.SECONDS)
         launchThreaded {
             delay(60000)
