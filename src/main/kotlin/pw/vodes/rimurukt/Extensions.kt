@@ -5,6 +5,7 @@ import org.javacord.api.entity.message.MessageFlag
 import org.javacord.api.interaction.SlashCommandInteraction
 import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater
 import java.time.Instant
+import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
@@ -15,6 +16,15 @@ fun Instant.getRelativeTimestamp(): String {
 fun Instant.getAbsoluteTimestamp(): String {
     return "<t:${this.epochSecond}:d> <t:${this.epochSecond}:t>"
 }
+
+infix fun String?.eqI(other: String?): Boolean {
+    return this.equals(other, true)
+}
+
+fun String.capitalize(): String {
+    return lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+}
+
 
 fun CompletableFuture<Message>.deleteAfter(value: Long, unit: TimeUnit = TimeUnit.SECONDS) {
     this.thenAccept {

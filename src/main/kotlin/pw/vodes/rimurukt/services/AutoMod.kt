@@ -15,12 +15,14 @@ import java.time.Duration
 import kotlin.jvm.optionals.getOrNull
 
 @Serializable
-data class AutoModEntry(var filteredSequence: String, var punishment: Punishment?, var punishmentVal: String)
+data class AutoModEntry(var filteredSequence: String, var punishment: Punishment?, var punishmentVal: Long)
 
 enum class Punishment {
     TIMEOUT, KICK, BAN;
 
-    fun get(name: String) = entries.find { name.equals(it.toString(), true) }
+    companion object {
+        fun get(name: String) = entries.find { name.equals(it.toString(), true) }
+    }
 }
 
 object AutoMod {
@@ -90,7 +92,7 @@ object AutoMod {
                     }
 
                     Punishment.TIMEOUT -> {
-                        Main.server.timeoutUser(user, Duration.ofMinutes(automod.punishmentVal.toLong()), "Automod")
+                        Main.server.timeoutUser(user, Duration.ofMinutes(automod.punishmentVal), "Automod")
                         message.delete()
                         embed.setDescription("Timeouted & Message deleted:\n```$content```")
                     }

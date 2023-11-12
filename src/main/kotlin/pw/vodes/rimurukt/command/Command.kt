@@ -30,7 +30,9 @@ abstract class Command(
 
     var enabled: Boolean = true
 
-    abstract fun run(event: MessageCreateEvent)
+    open fun run(event: MessageCreateEvent) {
+        event.channel.sendMessage("Regular command is currently not implemented.")
+    }
 
     open fun getSlashCommandBuilder(): SlashCommandBuilder? = null
 
@@ -87,6 +89,7 @@ object Commands {
         commands.add(CommandRestart())
         commands.add(CommandKick())
         commands.add(CommandBan())
+        commands.add(CommandAutomod())
 
         val builders = hashSetOf<SlashCommandBuilder>()
         commands.forEach {
