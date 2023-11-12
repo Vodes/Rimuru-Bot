@@ -12,6 +12,7 @@ import pw.vodes.rimurukt.misc.Updater
 import pw.vodes.rimurukt.services.AuditLogs
 import pw.vodes.rimurukt.services.AutoMod
 import pw.vodes.rimurukt.services.AutoRoles
+import pw.vodes.rimurukt.services.rss.RSSFeeds
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -65,5 +66,7 @@ fun initServices() {
     Commands.load()
     Main.server.addMessageCreateListener { Commands.tryRunCommand(it) }
     Commands.save()
+
+    RSSFeeds.load()
 }
 

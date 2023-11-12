@@ -24,6 +24,8 @@ dependencies {
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r")
     // https://mvnrepository.com/artifact/org.unbescape/unbescape
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
+    // https://mvnrepository.com/artifact/com.apptasticsoftware/rssreader
+    implementation("com.apptasticsoftware:rssreader:3.5.0")
 
 
     // These are local and/or not for this bot

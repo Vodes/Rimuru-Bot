@@ -21,7 +21,13 @@ fun Instant.getAbsoluteTimestamp(): String {
 }
 
 infix fun String?.eqI(other: String?): Boolean {
-    return this.equals(other, true)
+    return equals(other, true)
+}
+
+infix fun String?.ctI(other: String?): Boolean {
+    if (this == null || other == null)
+        return false
+    return contains(other, true)
 }
 
 fun String.capitalize(): String {
