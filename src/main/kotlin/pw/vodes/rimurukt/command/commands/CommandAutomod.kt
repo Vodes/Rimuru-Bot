@@ -3,10 +3,10 @@ package pw.vodes.rimurukt.command.commands
 import org.javacord.api.entity.message.MessageFlag
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.interaction.*
-import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.capitalize
 import pw.vodes.rimurukt.command.Command
 import pw.vodes.rimurukt.command.CommandType
+import pw.vodes.rimurukt.command.Commands
 import pw.vodes.rimurukt.reply
 import pw.vodes.rimurukt.services.AutoMod
 import pw.vodes.rimurukt.services.AutoModEntry
@@ -72,14 +72,14 @@ class CommandAutomod : Command("Automod", arrayOf("filter", "automod"), CommandT
                     )
                 )
                 AutoMod.save()
-                Main.api.bulkOverwriteServerApplicationCommands(Main.server, setOf(this.getSlashCommandBuilder()))
+                Commands.updateSlashCommands()
                 interaction.reply("Filter added.")
             }
 
             "remove" -> {
                 AutoMod.automods.removeAt(option.options[0].longValue.get().toInt())
                 AutoMod.save()
-                Main.api.bulkOverwriteServerApplicationCommands(Main.server, setOf(this.getSlashCommandBuilder()))
+                Commands.updateSlashCommands()
                 interaction.reply("Filter removed.")
             }
 

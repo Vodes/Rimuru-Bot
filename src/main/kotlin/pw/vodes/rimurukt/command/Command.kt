@@ -92,12 +92,8 @@ object Commands {
         commands.add(CommandAutomod())
         commands.add(CommandAutorole())
 
-        val builders = hashSetOf<SlashCommandBuilder>()
-        commands.forEach {
-            val builder = it.getSlashCommandBuilder() ?: return@forEach
-            builders.add(builder)
-        }
-        Main.api.bulkOverwriteServerApplicationCommands(Main.server, builders)
+        updateSlashCommands()
+
         Main.api.addSlashCommandCreateListener {
             if (it.slashCommandInteraction.applicationId != Main.api.yourself.id)
                 return@addSlashCommandCreateListener
@@ -121,6 +117,15 @@ object Commands {
                     cmd.enabled = status.enabled
             }
         }
+    }
+
+    fun updateSlashCommands() {
+        val builders = hashSetOf<SlashCommandBuilder>()
+        commands.forEach {
+            val builder = it.getSlashCommandBuilder() ?: return@forEach
+            builders.add(builder)
+        }
+        Main.api.bulkOverwriteServerApplicationCommands(Main.server, builders)
     }
 
     fun save() {

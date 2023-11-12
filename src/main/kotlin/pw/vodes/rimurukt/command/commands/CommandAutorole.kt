@@ -6,6 +6,7 @@ import org.javacord.api.entity.server.Server
 import org.javacord.api.interaction.*
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.command.Command
+import pw.vodes.rimurukt.command.Commands
 import pw.vodes.rimurukt.eqI
 import pw.vodes.rimurukt.reply
 import pw.vodes.rimurukt.services.AutoRoles
@@ -74,13 +75,13 @@ class CommandAutorole : Command("autorole", slashCommandName = "autorole") {
                 if (!result)
                     interaction.reply("Could not add listeners. Please check the logs.", true).also { return }
 
-                Main.api.bulkOverwriteServerApplicationCommands(interaction.server.get(), setOf(this.getSlashCommandBuilder()))
+                Commands.updateSlashCommands()
                 interaction.reply("Autorole added.")
             }
 
             "remove" -> {
                 AutoRoles.removeAutoRole(AutoRoles.autoroles[opt.options[0].longValue.get().toInt()])
-                Main.api.bulkOverwriteServerApplicationCommands(interaction.server.get(), setOf(this.getSlashCommandBuilder()))
+                Commands.updateSlashCommands()
                 interaction.reply("Autorole removed.")
             }
 
