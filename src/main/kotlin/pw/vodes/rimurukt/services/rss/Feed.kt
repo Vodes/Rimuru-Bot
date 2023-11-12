@@ -80,13 +80,12 @@ data class Feed(val name: String, val url: String, val regex: String, val server
         val isU2 = url ctI "u2.dmhy.org"
         val isNyaa = url ctI "nyaa.si"
 
-        var items = items.toList()
-        if (firstCheck)
-            items = items.filter { Instant.ofEpochSecond(it.getUnixPubTime()).isAfter(Instant.now().minus(24, ChronoUnit.HOURS)) }
-
         for (item in items) {
             if (item.wasPosted)
                 continue
+            if (firstCheck && Instant.ofEpochSecond(item.getUnixPubTime()).isBefore(Instant.now().minus(24, ChronoUnit.HOURS)))
+                continue
+
             val title = HtmlEscape.unescapeHtml(item.title)
             val embed = EmbedBuilder().setTitle(if (title.length > 256) title.substring(0, 250) else title)
 
@@ -104,17 +103,22 @@ data class Feed(val name: String, val url: String, val regex: String, val server
             }
 
             val image = item.getImage()
-            if (image.isNullOrBlank())
+            if (!image.isNullOrBlank())
                 embed.setImage(image)
 
             embed.setUrl(item.getPostURL())
             embed.setTimestamp(Instant.ofEpochSecond(item.getUnixPubTime()))
-            channel().sendMessage(embed).thenAccept {
+            val future = channel().sendMessage(embed).thenAccept {
                 item.wasPosted = true
                 it.crossPost()
             }.exceptionally {
                 reportException(it, "Could not post FeedItem with URL: ${item.getPostURL()}")
                 null
+            }
+            // I want this to be blocking so stuff gets saved properly. Not really sure of a better way to do it.
+            try {
+                future.join()
+            } catch (_: Exception) {
             }
         }
     }

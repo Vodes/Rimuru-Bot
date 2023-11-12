@@ -33,6 +33,7 @@ object RSSFeeds {
                     } catch (ex: Exception) {
                         reportException(ex, "Failed to check feed in main loop: ${it.name}")
                     }
+                    delay(10000)
                     save()
                     delay(30000)
                 }
