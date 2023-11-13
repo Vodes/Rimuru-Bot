@@ -8,6 +8,7 @@ import org.javacord.api.entity.user.User
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.json
 import pw.vodes.rimurukt.launchThreaded
+import pw.vodes.rimurukt.reportException
 import java.io.File
 import java.net.SocketTimeoutException
 import java.time.Instant
@@ -63,7 +64,7 @@ object AuditLogs {
         launchThreaded {
             while (true) {
                 checkAuditLogs()
-                delay(2000)
+                delay(3000)
             }
         }
     }
@@ -71,8 +72,7 @@ object AuditLogs {
     private fun checkAuditLogs() {
         try {
             val logs = Main.server.getAuditLog(15).join().entries
-            val filtered = logs.filter { it.creationTimestamp.isAfter(Instant.now().minusMillis(if (timeouted) 15 else 7)) && !it.user.get().isYourself }
-
+            val filtered = logs.filter { it.creationTimestamp.isAfter(Instant.now().minusMillis(if (timeouted) 15 else 8)) && !it.user.get().isYourself }
             for (log in filtered) {
                 when (log.type) {
                     AuditLogActionType.MEMBER_KICK -> {
@@ -80,7 +80,7 @@ object AuditLogs {
                             StaffAction(
                                 log.target.get().asUser().get().idAsString,
                                 log.user.get().idAsString,
-                                Instant.now().epochSecond,
+                                log.creationTimestamp.epochSecond,
                                 StaffActionType.KICK,
                                 log.reason.orElse("")
                             )
@@ -92,7 +92,7 @@ object AuditLogs {
                             StaffAction(
                                 log.target.get().asUser().get().idAsString,
                                 log.user.get().idAsString,
-                                Instant.now().epochSecond,
+                                log.creationTimestamp.epochSecond,
                                 StaffActionType.BAN,
                                 log.reason.orElse("")
                             )
@@ -104,7 +104,7 @@ object AuditLogs {
                             StaffAction(
                                 log.target.get().asUser().get().idAsString,
                                 log.user.get().idAsString,
-                                Instant.now().epochSecond,
+                                log.creationTimestamp.epochSecond,
                                 StaffActionType.UNBAN,
                                 log.reason.orElse("")
                             )
@@ -119,7 +119,7 @@ object AuditLogs {
             if (ex is SocketTimeoutException)
                 timeouted = true
             else
-                ex.printStackTrace()
+                reportException(ex, this.javaClass.canonicalName)
         }
     }
 }
