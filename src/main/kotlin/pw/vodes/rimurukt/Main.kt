@@ -13,7 +13,10 @@ import pw.vodes.rimurukt.services.AuditLogs
 import pw.vodes.rimurukt.services.AutoMod
 import pw.vodes.rimurukt.services.AutoRoles
 import pw.vodes.rimurukt.services.rss.RSSFeeds
+import pw.vodes.rimurukt.services.verification.UnverifiedPurging
+import pw.vodes.rimurukt.services.verification.VerificationListener
 import java.io.File
+import kotlin.jvm.optionals.getOrNull
 import kotlin.system.exitProcess
 
 object Main {
@@ -62,12 +65,19 @@ fun initServices() {
     AuditLogs.start()
     Main.server.addServerMemberJoinListener(MemberListeners.JoinListener())
     Main.server.addServerMemberLeaveListener(MemberListeners.LeaveListener())
-    
+
     RSSFeeds.load()
 
     Commands.load()
     Main.server.addMessageCreateListener { Commands.tryRunCommand(it) }
     Commands.save()
 
+    UnverifiedPurging.start()
+    if (Main.config.verificationChannel.isNotBlank()) {
+        val verificationChannel = Main.server.getChannelById(Main.config.verificationChannel).getOrNull() ?: return
+        val verificationRole = Main.server.getRoleById(Main.config.verificationRole).getOrNull() ?: return
+        val verificationMessage = verificationChannel.asServerTextChannel().getOrNull()?.getMessageById(Main.config.verificationReactionMessage)?.get() ?: return
+        verificationMessage.addReactionAddListener(VerificationListener())
+    }
 }
 

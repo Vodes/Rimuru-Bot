@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 import net.peanuuutz.tomlkt.Toml
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import java.io.File
+import java.security.SecureRandom
 import java.time.Instant
 import kotlin.math.min
 
@@ -21,6 +22,8 @@ val toml = Toml {
     ignoreUnknownKeys = true
     explicitNulls = true
 }
+
+val random = SecureRandom()
 
 fun epochSecond() = Instant.now().epochSecond
 
