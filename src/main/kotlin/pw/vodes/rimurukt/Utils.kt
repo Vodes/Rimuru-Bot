@@ -34,7 +34,7 @@ fun getAppDir(): File {
         dir.mkdirs()
         dir
     } else {
-        val configDir = File(System.getProperty("user.dir"), ".config")
+        val configDir = File(System.getProperty("user.home"), ".config")
         val mainDir = File(configDir, "Vodes")
         val dir = File(mainDir, "RimuruKt")
         dir.mkdirs()
