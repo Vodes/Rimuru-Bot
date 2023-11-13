@@ -53,6 +53,11 @@ class VerificationListener : ReactionAddListener {
         }.removeAfter(17, TimeUnit.SECONDS)
 
         launchThreaded {
+            delay(1500)
+            deleteCreationMessages(event)
+        }
+
+        launchThreaded {
             delay(17000)
             val thr = Main.server.getThreadChannelById(thread.id).getOrNull() ?: return@launchThreaded
             thr.delete()
@@ -91,4 +96,16 @@ private fun sendFailEmbed(user: User, math: VerificationMath, title: String, ans
 
     val channel = Main.config.hallOfShameChannel() ?: return
     channel.sendMessage(embed)
+}
+
+private fun deleteCreationMessages(event: ReactionAddEvent) {
+    try {
+        val messages = event.channel.getMessages(10).get().filter { it.author.isYourself }
+        if (messages.isNotEmpty())
+            if (messages.size < 2)
+                messages.first().delete()
+            else
+                event.serverTextChannel.get().bulkDelete(messages)
+    } catch (_: Exception) {
+    }
 }
