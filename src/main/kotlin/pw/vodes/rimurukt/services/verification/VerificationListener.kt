@@ -2,6 +2,8 @@ package pw.vodes.rimurukt.services.verification
 
 import kotlinx.coroutines.delay
 import org.javacord.api.entity.channel.ChannelType
+import org.javacord.api.entity.message.embed.EmbedBuilder
+import org.javacord.api.entity.user.User
 import org.javacord.api.event.message.reaction.ReactionAddEvent
 import org.javacord.api.listener.message.reaction.ReactionAddListener
 import pw.vodes.rimurukt.Main
@@ -40,6 +42,7 @@ class VerificationListener : ReactionAddListener {
                         role.addUser(user)
                     } else {
                         Main.server.timeoutUser(user, Duration.ofMinutes(5), "Incorrect Verification")
+                        sendFailEmbed(user, math, "Failed verification", answer)
                     }
                     it.message.delete()
                     thread.delete()
@@ -77,4 +80,15 @@ private class VerificationMath {
     }
 
     private fun doubleVal(num1: Int, num2: Int, num3: Int) = (num1.toDouble() / num2.toDouble()) - num3.toDouble()
+}
+
+private fun sendFailEmbed(user: User, math: VerificationMath, title: String, answer: Double) {
+    val embed = EmbedBuilder().setTitle(title).setAuthor(user)
+        .addField("Question", math.message)
+        .addField("User's Answer", (if (answer.roundToInt() == answer.toInt()) answer.roundToInt() else answer).toString())
+        .addField("Correct Answer", "${math.result}")
+        .setFooter("UserID: ${user.idAsString}")
+
+    val channel = Main.config.hallOfShameChannel() ?: return
+    channel.sendMessage(embed)
 }
