@@ -60,11 +60,11 @@ data class Feed(val name: String, val url: String, val regex: String, val server
                 } catch (ex: Exception) {
                     reportException(ex, "Parsing posts for $name")
                 }
-                var sorted = items.sortedByDescending { it.getUnixPubTime() }
-                if (sorted.size > 50)
-                    sorted = sorted.subList(0, 49)
-                items = sorted.toMutableList()
             }
+            var sorted = items.sortedByDescending { it.getUnixPubTime() }
+            if (sorted.size > 50)
+                sorted = sorted.subList(0, 49)
+            items = sorted.toMutableList()
         } catch (ex: Exception) {
             reportException(ex, "Retrieving posts for $name")
         }
