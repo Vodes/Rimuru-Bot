@@ -4,7 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.encodeToString
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.json
-import pw.vodes.rimurukt.launchThreaded
+import pw.vodes.rimurukt.launchGlobal
 import pw.vodes.rimurukt.reportException
 import java.io.File
 
@@ -24,7 +24,7 @@ object RSSFeeds {
     }
 
     private fun start() {
-        launchThreaded {
+        launchGlobal {
             delay(30000)
             while (true) {
                 feeds.forEach {

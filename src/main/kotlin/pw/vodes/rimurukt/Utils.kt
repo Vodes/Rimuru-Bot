@@ -1,8 +1,6 @@
 package pw.vodes.rimurukt
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import net.peanuuutz.tomlkt.Toml
 import org.javacord.api.entity.message.embed.EmbedBuilder
@@ -42,13 +40,19 @@ fun getAppDir(): File {
     }
 }
 
-fun launchThreaded(run: suspend CoroutineScope.() -> Unit): Pair<Job, CoroutineScope> {
-    val job = Job()
-    val scope = CoroutineScope(job)
+fun launchThreaded(run: suspend CoroutineScope.() -> Unit): CoroutineScope {
+    val scope = CoroutineScope(Dispatchers.IO)
     scope.launch {
         run()
     }
-    return Pair(job, scope)
+    return scope
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+fun launchGlobal(run: suspend CoroutineScope.() -> Unit) {
+    GlobalScope.launch {
+        run()
+    }
 }
 
 fun reportException(ex: Throwable, source: String? = null) {

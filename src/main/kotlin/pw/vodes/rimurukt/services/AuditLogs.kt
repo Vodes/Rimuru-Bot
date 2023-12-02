@@ -7,7 +7,7 @@ import org.javacord.api.entity.auditlog.AuditLogActionType
 import org.javacord.api.entity.user.User
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.json
-import pw.vodes.rimurukt.launchThreaded
+import pw.vodes.rimurukt.launchGlobal
 import pw.vodes.rimurukt.reportException
 import java.io.File
 import java.net.SocketTimeoutException
@@ -61,7 +61,7 @@ object AuditLogs {
 
     fun start() {
         load()
-        launchThreaded {
+        launchGlobal {
             while (true) {
                 checkAuditLogs()
                 delay(3000)
@@ -72,7 +72,8 @@ object AuditLogs {
     private fun checkAuditLogs() {
         try {
             val logs = Main.server.getAuditLog(15).join().entries
-            val filtered = logs.filter { it.creationTimestamp.isAfter(Instant.now().minusMillis(if (timeouted) 15 else 8)) && !it.user.get().isYourself }
+            val filtered =
+                logs.filter { it.creationTimestamp.isAfter(Instant.now().minusMillis(if (timeouted) 15 else 8)) && !it.user.get().isYourself }
             for (log in filtered) {
                 when (log.type) {
                     AuditLogActionType.MEMBER_KICK -> {

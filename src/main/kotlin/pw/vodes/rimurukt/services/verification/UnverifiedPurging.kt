@@ -3,7 +3,7 @@ package pw.vodes.rimurukt.services.verification
 import kotlinx.coroutines.time.delay
 import org.javacord.api.entity.user.User
 import pw.vodes.rimurukt.Main
-import pw.vodes.rimurukt.launchThreaded
+import pw.vodes.rimurukt.launchGlobal
 import pw.vodes.rimurukt.services.AuditLogs
 import pw.vodes.rimurukt.services.StaffAction
 import pw.vodes.rimurukt.services.StaffActionType
@@ -14,7 +14,7 @@ import java.time.temporal.ChronoUnit
 
 object UnverifiedPurging {
     fun start() {
-        launchThreaded {
+        launchGlobal {
             while (Main.config.purge3Days) {
                 val purgeTime = Instant.now().minus(3, ChronoUnit.DAYS)
                 for (user in Main.server.members) {
