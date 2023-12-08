@@ -34,8 +34,8 @@ object UnverifiedPurging {
                         }
                     }
                 }
+                delay(Duration.ofMinutes(10))
             }
-            delay(Duration.ofMinutes(10))
         }
     }
 
