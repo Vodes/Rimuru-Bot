@@ -93,6 +93,7 @@ object Commands {
         commands.add(CommandAutorole())
         commands.add(CommandUserInfo())
         commands.add(CommandRSS())
+        commands.add(CommandStealEmote())
 
         updateSlashCommands()
 
@@ -104,7 +105,8 @@ object Commands {
                     if (!cmd.enabled)
                         it.slashCommandInteraction.reply("This command is currently disabled!").also { return@addSlashCommandCreateListener }
                     if (!hasPerms(cmd, it.slashCommandInteraction.user))
-                        it.slashCommandInteraction.reply("You don't have permissions to run this command.").also { return@addSlashCommandCreateListener }
+                        it.slashCommandInteraction.reply("You don't have permissions to run this command.")
+                            .also { return@addSlashCommandCreateListener }
                     cmd.runSlashCommand(it.slashCommandInteraction)
                     return@addSlashCommandCreateListener
                 }
