@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "pw.vodes"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -15,13 +15,13 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("net.peanuuutz.tomlkt:tomlkt:0.3.7")
     implementation("org.javacord:javacord:3.8.0")
 
     // https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
-    implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r")
     // https://mvnrepository.com/artifact/org.unbescape/unbescape
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
     // https://mvnrepository.com/artifact/com.apptasticsoftware/rssreader

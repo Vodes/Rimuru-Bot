@@ -27,7 +27,7 @@ object Main {
 
     lateinit var configFile: File
 
-    const val VERSION = "1.0.0"
+    const val VERSION = "1.0.1"
 }
 
 fun main(args: Array<String>) {
@@ -76,7 +76,8 @@ fun initServices() {
     if (Main.config.verificationChannel.isNotBlank()) {
         val verificationChannel = Main.server.getChannelById(Main.config.verificationChannel).getOrNull() ?: return
         val verificationRole = Main.server.getRoleById(Main.config.verificationRole).getOrNull() ?: return
-        val verificationMessage = verificationChannel.asServerTextChannel().getOrNull()?.getMessageById(Main.config.verificationReactionMessage)?.get() ?: return
+        val verificationMessage =
+            verificationChannel.asServerTextChannel().getOrNull()?.getMessageById(Main.config.verificationReactionMessage)?.get() ?: return
         verificationMessage.addReactionAddListener(VerificationListener())
     }
 }
