@@ -56,10 +56,14 @@ fun launchGlobal(run: suspend CoroutineScope.() -> Unit) {
 }
 
 fun reportException(ex: Throwable, source: String? = null) {
-    var stacktrace = ex.stackTraceToString()
-    var message = ex.localizedMessage
+    val stacktrace = ex.stackTraceToString()
+    val message = ex.localizedMessage
+
     try {
         println(stacktrace)
+
+        if (source ctI "Nyaa")
+            return
 
         val trimmed = stacktrace.subSequence(stacktrace.indexOf("\n") + 1, min(stacktrace.length, 1200))
         val description = if (trimmed.contains("pw.vodes.rimurukt")) "${message}\n```\n$trimmed```" else message

@@ -5,10 +5,7 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.encodeToString
 import org.javacord.api.entity.auditlog.AuditLogActionType
 import org.javacord.api.entity.user.User
-import pw.vodes.rimurukt.Main
-import pw.vodes.rimurukt.json
-import pw.vodes.rimurukt.launchGlobal
-import pw.vodes.rimurukt.reportException
+import pw.vodes.rimurukt.*
 import java.io.File
 import java.net.SocketTimeoutException
 import java.time.Instant
@@ -117,7 +114,7 @@ object AuditLogs {
             }
             timeouted = false
         } catch (ex: Exception) {
-            if (ex is SocketTimeoutException)
+            if (ex is SocketTimeoutException || ex.message ctI "timeout")
                 timeouted = true
             else
                 reportException(ex, this.javaClass.canonicalName)
