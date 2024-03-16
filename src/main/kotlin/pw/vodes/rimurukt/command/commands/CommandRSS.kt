@@ -25,7 +25,24 @@ class CommandRSS : Command("rss", type = CommandType.MOD, slashCommandName = "rs
         val addArgs = listOf(
             SlashCommandOption.createStringOption("Name", "Name shown in lists and whatnot", true),
             SlashCommandOption.createStringOption("URL", "URL for the RSS Feed", true),
-            SlashCommandOption.createChannelOption("Channel", "Channel in which the new entries will be posted", true, setOf(ChannelType.SERVER_TEXT_CHANNEL)),
+            SlashCommandOption.createChannelOption(
+                "Channel",
+                "Channel in which the new entries will be posted",
+                true,
+                setOf(ChannelType.SERVER_TEXT_CHANNEL)
+            ),
+            SlashCommandOption.createStringOption("Regex", "Only posts matching this regex will be posted if given", false)
+        )
+
+        val editArgs = listOf(
+            SlashCommandOption.createStringOption("Name", "Name shown in lists and whatnot", false),
+            SlashCommandOption.createStringOption("URL", "URL for the RSS Feed", false),
+            SlashCommandOption.createChannelOption(
+                "Channel",
+                "Channel in which the new entries will be posted",
+                false,
+                setOf(ChannelType.SERVER_TEXT_CHANNEL)
+            ),
             SlashCommandOption.createStringOption("Regex", "Only posts matching this regex will be posted if given", false)
         )
 
@@ -40,7 +57,7 @@ class CommandRSS : Command("rss", type = CommandType.MOD, slashCommandName = "rs
                 SlashCommandOptionType.SUB_COMMAND,
                 "edit",
                 "Edit RSS Feed",
-                mutableListOf(choice).apply { this.addAll(addArgs) })
+                mutableListOf(choice).apply { this.addAll(editArgs) })
         )
 
         if (RSSFeeds.feeds.isNotEmpty())
@@ -61,20 +78,39 @@ class CommandRSS : Command("rss", type = CommandType.MOD, slashCommandName = "rs
         }
         when (opt.name) {
             "add", "edit" -> {
-                val name = opt.getOptionByName("Name").get().stringValue.get()
-                val url = opt.getOptionByName("URL").get().stringValue.get()
-                val channel = opt.getOptionByName("Channel").get().channelValue.get().asServerTextChannel().get()
-                val regex = opt.getOptionByName("Regex").getOrNull()?.stringValue?.getOrNull() ?: ""
-                if (!channel.canYouSee() || !channel.canYouWrite())
+                val channel = opt.getOptionByName("Channel").getOrNull()?.channelValue?.getOrNull()?.asServerTextChannel()?.getOrNull()
+                val regex = opt.getOptionByName("Regex").getOrNull()?.stringValue?.getOrNull()
+                if (opt.name eqI "add") {
+                    if (channel == null) {
+                        interaction.reply("No valid channel was provided.")
+                        return
+                    }
+                }
+                if (channel != null && (!channel.canYouSee() || !channel.canYouWrite()))
                     interaction.reply("The bot does not have sufficient permissions for this channel!").also { return }
 
                 if (opt.name eqI "edit") {
+                    val name = opt.getOptionByName("Name").getOrNull()?.stringValue?.getOrNull() ?: ""
+                    val url = opt.getOptionByName("URL").getOrNull()?.stringValue?.getOrNull() ?: ""
                     val index = opt.getOptionByName("Feed").get().longValue.get().toInt()
-                    val feed = RSSFeeds.feeds[index].copy(name = name, url = url, regex = regex, serverID = channel.server.idAsString, channelID = channel.idAsString)
+                    val existing = RSSFeeds.feeds[index]
+                    val feed = existing.copy(
+                        name = name.ifBlank { existing.name },
+                        url = url.ifBlank { existing.url },
+                        regex = regex ?: existing.regex,
+                        serverID = channel?.server?.idAsString ?: existing.serverID,
+                        channelID = channel?.idAsString ?: existing.channelID
+                    )
                     RSSFeeds.feeds[index] = feed
                     interaction.reply("RSS Feed edited.")
                 } else {
-                    RSSFeeds.feeds.add(Feed(name, url, regex, channel.server.idAsString, channel.idAsString))
+                    if (channel == null) {
+                        interaction.reply("No valid channel was provided.")
+                        return
+                    }
+                    val name = opt.getOptionByName("Name").get().stringValue.get()
+                    val url = opt.getOptionByName("URL").get().stringValue.get()
+                    RSSFeeds.feeds.add(Feed(name, url, regex ?: "", channel.server.idAsString, channel.idAsString))
                     interaction.reply("RSS Feed added.")
                 }
 
