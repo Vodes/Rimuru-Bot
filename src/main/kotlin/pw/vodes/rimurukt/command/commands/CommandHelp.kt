@@ -26,7 +26,7 @@ class CommandHelp : Command("Help", arrayOf("help", "h"), slashCommandName = "he
                 .setThumbnail(Main.api.yourself.getAvatar(4096))
                 .addField("Version", version, true)
                 .addField("Written by", "<@129871096299126784>", true)
-                .addField("Source code", "https://github.com/Vodes/Rimuru-Bot/tree/rewrite-kotlin", false)
+                .addField("Source code", "https://github.com/Vodes/Rimuru-Bot", false)
         }.addPage {
             it.setTitle("Commands").setAuthor(user)
             commands.forEachIndexed { index, command ->
@@ -41,7 +41,8 @@ class CommandHelp : Command("Help", arrayOf("help", "h"), slashCommandName = "he
     }
 
     override fun getSlashCommandBuilder(): SlashCommandBuilder? {
-        return SlashCommandBuilder().setEnabledInDms(false).setName("help").setDescription("Displays available commands and general information on the bot.")
+        return SlashCommandBuilder().setEnabledInDms(false).setName("help")
+            .setDescription("Displays available commands and general information on the bot.")
     }
 
     override fun runSlashCommand(interaction: SlashCommandInteraction) {

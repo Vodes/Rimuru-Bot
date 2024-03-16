@@ -91,7 +91,7 @@ data class UpdateConfig(
     val oauthToken: String = "",
     var currentCommit: String = "",
 
-    val customJvmArgs: String = "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xms1G -Xmx2G",
+    val customJvmArgs: String = "-Xms1G -Xmx1500M",
     val allowUpdate: Boolean = true,
     var restartTrigger: String = ""
 )
