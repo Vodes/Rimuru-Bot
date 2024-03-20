@@ -40,6 +40,7 @@ object UnverifiedPurging {
     }
 
     private fun shouldKick(user: User): Boolean {
-        return !(user.isBotOwner || user.isBot || Main.server.isAdmin(user) || Main.server.getRoles(user).isNotEmpty())
+        return !(user.isBotOwner || user.isBot || Main.server.isAdmin(user) || Main.server.getRoles(user).filterNot { it.isEveryoneRole }
+            .isNotEmpty())
     }
 }
