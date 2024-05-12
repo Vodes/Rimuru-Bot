@@ -1,12 +1,12 @@
 plugins {
-    kotlin("jvm") version "1.9.23"
-    kotlin("plugin.serialization") version "1.9.23"
+    kotlin("jvm") version "1.9.24"
+    kotlin("plugin.serialization") version "1.9.24"
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "pw.vodes"
-version = "1.1.0"
+version = "1.2.0"
 
 repositories {
     mavenCentral()
@@ -16,10 +16,10 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     implementation("net.peanuuutz.tomlkt:tomlkt:0.3.7")
     implementation("org.javacord:javacord:3.8.0")
-    implementation("org.slf4j:slf4j-simple:2.0.12")
+    implementation("org.slf4j:slf4j-simple:2.0.13")
     runtimeOnly("org.apache.logging.log4j:log4j-to-slf4j:2.23.1")
 
     // https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
@@ -31,7 +31,7 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 application {
