@@ -12,6 +12,7 @@ import pw.vodes.rimurukt.reportException
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+val BAD_NAMING_TAGS = listOf("smol", "koala", "legion")
 
 @Serializable
 data class Feed(val name: String, val url: String, val regex: String, val serverID: String, val channelID: String) {
@@ -86,8 +87,18 @@ data class Feed(val name: String, val url: String, val regex: String, val server
             if (firstCheck && Instant.ofEpochSecond(item.getUnixPubTime()).isBefore(Instant.now().minus(24, ChronoUnit.HOURS)))
                 continue
 
-            val title = HtmlEscape.unescapeHtml(item.title)
-            val embed = EmbedBuilder().setTitle(if (title.length > 256) title.substring(0, 250) else title)
+            var title = HtmlEscape.unescapeHtml(item.title)
+            var badNaming = false
+            for (tag in BAD_NAMING_TAGS) {
+                if (title.contains("[$tag]", true) || title.contains("-$tag", true))
+                    badNaming = true
+            }
+            if (badNaming && isNyaa) {
+                title = if (title.length > 256) title.substring(0, 239) else title
+                title += " (Bad Naming)"
+            } else
+                title = if (title.length > 256) title.substring(0, 250) else title
+            val embed = EmbedBuilder().setTitle(title)
 
             if (isU2 || isNyaa) {
                 embed.setAuthor(
