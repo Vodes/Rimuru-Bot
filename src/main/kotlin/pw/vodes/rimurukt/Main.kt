@@ -26,8 +26,6 @@ object Main {
     lateinit var appDir: File
 
     lateinit var configFile: File
-
-    const val VERSION = "1.2.0"
 }
 
 fun main(args: Array<String>) {

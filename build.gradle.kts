@@ -1,12 +1,13 @@
 plugins {
-    kotlin("jvm") version "1.9.24"
-    kotlin("plugin.serialization") version "1.9.24"
+    kotlin("jvm") version "2.0.0"
+    kotlin("plugin.serialization") version "2.0.0"
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.github.gmazzo.buildconfig") version "5.3.5"
 }
 
 group = "pw.vodes"
-version = "1.2.0"
+version = "1.3.0"
 
 repositories {
     mavenCentral()
@@ -36,4 +37,9 @@ kotlin {
 
 application {
     mainClass.set("pw.vodes.rimurukt.MainKt")
+}
+
+buildConfig {
+    buildConfigField("VERSION", provider { "${project.version}" })
+    buildConfigField("APPNAME", "Rimuru-Bot")
 }

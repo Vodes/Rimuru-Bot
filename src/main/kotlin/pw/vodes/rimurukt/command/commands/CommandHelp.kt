@@ -4,6 +4,7 @@ import org.javacord.api.entity.user.User
 import org.javacord.api.event.message.MessageCreateEvent
 import org.javacord.api.interaction.SlashCommandBuilder
 import org.javacord.api.interaction.SlashCommandInteraction
+import pw.vodes.rimuru.BuildConfig
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.command.Command
 import pw.vodes.rimurukt.command.Commands
@@ -13,15 +14,15 @@ class CommandHelp : Command("Help", arrayOf("help", "h"), slashCommandName = "he
 
     private fun getEmbed(user: User): MultiPageEmbed {
         val commit = Main.config.updateConfig.currentCommit
-        val version = if (commit.isBlank()) Main.VERSION else
-            "${Main.VERSION} [@${commit.subSequence(0, 6)}](https://github.com/Vodes/Rimuru-Bot/commit/$commit)"
+        val version = if (commit.isBlank()) BuildConfig.VERSION else
+            "${BuildConfig.VERSION} [@${commit.subSequence(0, 6)}](https://github.com/Vodes/Rimuru-Bot/commit/$commit)"
 
         val commands = Commands.commands
             .filter { !it.name.equals("help", true) }
             .sortedBy { it.name }
 
         return MultiPageEmbed(user) {
-            it.setTitle("Rimuru-Bot")
+            it.setTitle(BuildConfig.APPNAME)
                 .setAuthor(user)
                 .setThumbnail(Main.api.yourself.getAvatar(4096))
                 .addField("Version", version, true)
