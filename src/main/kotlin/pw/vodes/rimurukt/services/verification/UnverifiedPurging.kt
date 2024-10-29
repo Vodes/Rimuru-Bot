@@ -17,10 +17,12 @@ object UnverifiedPurging {
         launchGlobal {
             while (Main.config.purge3Days) {
                 val purgeTime = Instant.now().minus(3, ChronoUnit.DAYS)
+                val purgeTimeNewUser = Instant.now().minus(24, ChronoUnit.HOURS)
                 for (user in Main.server.members) {
                     if (!shouldKick(user))
                         continue
-                    if (user.getJoinedAtTimestamp(Main.server).get().isBefore(purgeTime)) {
+                    val isNewUser = user.creationTimestamp.isAfter(Instant.now().minus(7, ChronoUnit.DAYS))
+                    if (user.getJoinedAtTimestamp(Main.server).get().isBefore(if (isNewUser) purgeTimeNewUser else purgeTime)) {
                         Main.server.kickUser(user, "Unverified for 3+ days").thenRun {
                             AuditLogs.registerStaffAction(
                                 StaffAction(
