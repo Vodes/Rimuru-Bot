@@ -24,7 +24,7 @@ class VerificationListener : ReactionAddListener {
 
         if (role.hasUser(user))
             return
-        val newUser = user.creationTimestamp.isAfter(Instant.now().minus(7, ChronoUnit.DAYS))
+        val newUser = user.creationTimestamp.isAfter(Instant.now().minus(10, ChronoUnit.MINUTES))
         val math = VerificationMath(newUser)
         val thread = event.channel.asServerTextChannel().get().createThread(ChannelType.SERVER_PUBLIC_THREAD, user.name, 60, true).get()
 
@@ -37,7 +37,7 @@ class VerificationListener : ReactionAddListener {
                     try {
                         answer = it.messageContent.toDouble()
                     } catch (_: Exception) {
-                        Main.server.timeoutUser(user, if (newUser) Duration.ofDays(1) else Duration.ofMinutes(5), "Incorrect Verification")
+                        Main.server.timeoutUser(user, if (newUser) Duration.ofMinutes(10) else Duration.ofMinutes(5), "Incorrect Verification")
                         return@addMessageCreateListener
                     }
                     val answerCorrect = if (newUser)
@@ -48,7 +48,7 @@ class VerificationListener : ReactionAddListener {
                     if (answerCorrect) {
                         role.addUser(user)
                     } else {
-                        Main.server.timeoutUser(user, if (newUser) Duration.ofDays(1) else Duration.ofMinutes(5), "Incorrect Verification")
+                        Main.server.timeoutUser(user, if (newUser) Duration.ofMinutes(10) else Duration.ofMinutes(5), "Incorrect Verification")
                         sendFailEmbed(user, math, "Failed verification", answer)
                     }
                     it.message.delete()
@@ -57,7 +57,7 @@ class VerificationListener : ReactionAddListener {
                     reportException(ex, this.javaClass.canonicalName)
                 }
             }
-        }.removeAfter(if (newUser) 12 else 17, TimeUnit.SECONDS)
+        }.removeAfter(17, TimeUnit.SECONDS)
 
         launchThreaded {
             delay(1500)
@@ -65,11 +65,11 @@ class VerificationListener : ReactionAddListener {
         }
 
         launchThreaded {
-            delay(if (newUser) 11500 else 17000)
+            delay(17000)
             val thr = Main.server.getThreadChannelById(thread.id).getOrNull() ?: return@launchThreaded
             thr.delete()
-            if (newUser)
-                Main.server.timeoutUser(user, Duration.ofMinutes(60), "Incorrect Verification")
+//            if (newUser)
+//                Main.server.timeoutUser(user, Duration.ofMinutes(60), "Incorrect Verification")
         }
     }
 }
