@@ -14,13 +14,21 @@ object RSSFeeds {
     var feeds = mutableListOf<Feed>()
 
     fun load() {
-        if (file.exists())
-            feeds = json.decodeFromString(file.readText())
-        start()
+        runCatching {
+            if (file.exists())
+                feeds = json.decodeFromString(file.readText())
+            start()
+        }.onFailure {
+            it.printStackTrace()
+        }
     }
 
     fun save() {
-        file.writeText(json.encodeToString(feeds))
+        runCatching {
+            file.writeText(json.encodeToString(feeds))
+        }.onFailure {
+            it.printStackTrace()
+        }
     }
 
     private fun start() {
@@ -28,6 +36,7 @@ object RSSFeeds {
             delay(30000)
             while (true) {
                 feeds.forEach {
+                    println("Checking: ${it.name}")
                     try {
                         it.check()
                     } catch (ex: Exception) {

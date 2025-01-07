@@ -49,6 +49,7 @@ class CommandRSS : Command("rss", type = CommandType.MOD, slashCommandName = "rs
 
         val choice = SlashCommandOption.createWithChoices(
             SlashCommandOptionType.LONG, "Feed", "Feed to edit/remove", true,
+            // TODO: Figure out why this doesn't get updated?, Perhaps the longs should be unique? or maybe use something else
             RSSFeeds.feeds.mapIndexed { index, feed ->
                 SlashCommandOptionChoice.create(feed.name, index.toLong()).also { println("Registering ${index.toLong()} to ${feed.name}") }
             },
