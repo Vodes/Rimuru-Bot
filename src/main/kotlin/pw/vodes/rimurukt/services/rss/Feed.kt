@@ -9,8 +9,6 @@ import org.unbescape.html.HtmlEscape
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.ctI
 import pw.vodes.rimurukt.reportException
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -45,11 +43,8 @@ data class Feed(val name: String, val url: String, val regex: String, val server
 
     fun check() {
         val reader = RssReader()
-        var feedURL = getURL()
+        val feedURL = getURL()
         try {
-            if (feedURL.contains("?")) {
-                feedURL = feedURL.substringBefore("?") + "?" + URLEncoder.encode(feedURL.substringAfter("?"), StandardCharsets.UTF_8)
-            }
             reader.read(feedURL).forEach { item ->
                 try {
                     val feedItem = FeedItem.ofItem(item)
