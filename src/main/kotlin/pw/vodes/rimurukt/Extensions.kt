@@ -34,6 +34,14 @@ fun String.capitalize(): String {
     return lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 }
 
+fun String.lightEscapeURL(): String {
+    return this.replace("\"", "%22")
+        .replace(" ", "%20")
+        .replace("[", "%5B")
+        .replace("]", "%5D")
+        .replace("|", "%7C")
+}
+
 fun Icon.getFixedURL(): String {
     return if (isAnimated) url.toString().replace(".png", ".gif", true) else url.toString()
 }

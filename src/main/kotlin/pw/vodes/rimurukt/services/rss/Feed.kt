@@ -8,6 +8,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.unbescape.html.HtmlEscape
 import pw.vodes.rimurukt.Main
 import pw.vodes.rimurukt.ctI
+import pw.vodes.rimurukt.lightEscapeURL
 import pw.vodes.rimurukt.reportException
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -43,12 +44,7 @@ data class Feed(val name: String, val url: String, val regex: String, val server
 
     fun check() {
         val reader = RssReader()
-        val feedURL = getURL()
-            .replace("\"", "%22")
-            .replace(" ", "%20")
-            .replace("[", "%5B")
-            .replace("]", "%5D")
-            .replace("|", "%7C")
+        val feedURL = getURL().lightEscapeURL()
         try {
             reader.read(feedURL).forEach { item ->
                 try {

@@ -9,6 +9,7 @@ import pw.vodes.rimurukt.command.Command
 import pw.vodes.rimurukt.command.CommandType
 import pw.vodes.rimurukt.command.Commands
 import pw.vodes.rimurukt.eqI
+import pw.vodes.rimurukt.lightEscapeURL
 import pw.vodes.rimurukt.reply
 import pw.vodes.rimurukt.services.rss.Feed
 import pw.vodes.rimurukt.services.rss.RSSFeeds
@@ -48,7 +49,9 @@ class CommandRSS : Command("rss", type = CommandType.MOD, slashCommandName = "rs
 
         val choice = SlashCommandOption.createWithChoices(
             SlashCommandOptionType.LONG, "Feed", "Feed to edit/remove", true,
-            RSSFeeds.feeds.mapIndexed { index, feed -> SlashCommandOptionChoice.create(feed.name, index.toLong()) }
+            RSSFeeds.feeds.mapIndexed { index, feed ->
+                SlashCommandOptionChoice.create(feed.name, index.toLong()).also { println("Registering ${index.toLong()} to ${feed.name}") }
+            },
         )
 
         builder.addOption(SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "add", "Add new RSS Feed", addArgs))
@@ -93,6 +96,7 @@ class CommandRSS : Command("rss", type = CommandType.MOD, slashCommandName = "rs
                     val name = opt.getOptionByName("Name").getOrNull()?.stringValue?.getOrNull() ?: ""
                     val url = opt.getOptionByName("URL").getOrNull()?.stringValue?.getOrNull() ?: ""
                     val index = opt.getOptionByName("Feed").get().longValue.get().toInt()
+                    println("Edit command received $index as index?")
                     val existing = RSSFeeds.feeds[index]
                     val feed = existing.copy(
                         name = name.ifBlank { existing.name },
@@ -140,9 +144,9 @@ class CommandRSS : Command("rss", type = CommandType.MOD, slashCommandName = "rs
             embed.setDescription("There are currently no feeds on this server.")
         else
             feeds.forEachIndexed { index, feed ->
-                var shortURL = feed.url.removePrefix("https://").removePrefix("http://")
+                var shortURL = feed.url.lightEscapeURL().removePrefix("https://").removePrefix("http://")
                 shortURL = if (shortURL.length > 170) "${shortURL.substring(0, 169)}..." else shortURL
-                embed.addField("${index + 1}. ${feed.name}", "in: ${feed.channel().mentionTag}\n[$shortURL](${feed.url})")
+                embed.addField("${index + 1}. ${feed.name}", "in: ${feed.channel().mentionTag}\n[$shortURL](${feed.url.lightEscapeURL()})")
             }
         return embed
     }
