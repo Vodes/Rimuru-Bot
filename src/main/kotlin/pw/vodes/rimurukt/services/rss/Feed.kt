@@ -29,7 +29,7 @@ data class Feed(val name: String, val url: String, val regex: String, val server
     }
 
     private fun getURL(): String {
-        var feedURL = url
+        var feedURL = url.trim()
         if (url.contains("u2.dmhy.org", true)) {
             if (Main.config.u2Passkey.isBlank())
                 return feedURL
@@ -44,6 +44,11 @@ data class Feed(val name: String, val url: String, val regex: String, val server
     fun check() {
         val reader = RssReader()
         val feedURL = getURL()
+            .replace("\"", "%22")
+            .replace(" ", "%20")
+            .replace("[", "%5B")
+            .replace("]", "%5D")
+            .replace("|", "%7C")
         try {
             reader.read(feedURL).forEach { item ->
                 try {
