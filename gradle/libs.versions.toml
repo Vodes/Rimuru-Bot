@@ -1,0 +1,22 @@
+[versions]
+junit-jupiter-engine = "6.0.1"
+kord = "0.18.1"
+jda = "6.3.2"
+jda-ktx = "0.14.2"
+buildconfig = "5.3.5"
+kstore = "1.0.0"
+kotlinx-serialization-json = "1.9.0"
+
+[libraries]
+kord = { module = "dev.kord:kord-core", version.ref = "kord" }
+jda = { module = "net.dv8tion:JDA", version.ref = "jda" }
+jda-ktx = { module = "club.minnced:jda-ktx", version.ref = "jda-ktx" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter-engine" }
+kstore = { module = "io.github.xxfast:kstore", version.ref = "kstore" }
+kstore-file = { module = "io.github.xxfast:kstore-file", version.ref = "kstore" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.3.0" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.3.0" }
+buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }

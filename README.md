@@ -1,2 +1,2 @@
 # Rimuru-Bot
-A single server discord moderation and w/e bot
+An odd discord moderation and w/e bot
