@@ -1,10 +1,9 @@
 package pw.vodes.rimuru.command.generic
 
-import net.dv8tion.jda.api.components.actionrow.ActionRow
-import net.dv8tion.jda.api.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel
+import net.dv8tion.jda.api.components.selections.SelectOption
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
@@ -16,8 +15,15 @@ import pw.vodes.rimuru.command.Command
 import pw.vodes.rimuru.command.CommandType
 import pw.vodes.rimuru.services.rss.RssFeed
 import pw.vodes.rimuru.services.rss.RssFeedService
+import pw.vodes.rimuru.util.AutocompleteChoices
+import pw.vodes.rimuru.util.OwnedStringSelectHandler
+import pw.vodes.rimuru.util.ScopedInteractionId
 
 class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
+    init {
+        RemoveMenuHandler
+    }
+
     override fun guildOnly() = true
 
     override fun createCommand() = slashCommand()
@@ -57,60 +63,23 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
             event.replyChoices(emptyList()).queue()
             return
         }
-        val query = event.focusedOption.value.lowercase()
-        val choices = guildFeedEntries(guild)
-            .filter { entry ->
+        AutocompleteChoices.replyMatching(
+            event = event,
+            entries = guildFeedEntries(guild),
+            maxChoices = MAX_AUTOCOMPLETE_CHOICES,
+            matches = { entry, query ->
                 query.isBlank()
                     || entry.value.name.lowercase().contains(query)
                     || entry.value.url.lowercase().contains(query)
-            }
-            .take(MAX_AUTOCOMPLETE_CHOICES)
-            .map { entry ->
-                Choice(feedChoiceLabel(entry.index, entry.value), entry.index.toString())
-            }
-
-        event.replyChoices(choices).queue()
+            },
+            toChoice = { entry -> Choice(feedChoiceLabel(entry.index, entry.value), entry.index.toString()) }
+        )
     }
 
     companion object {
         private const val REMOVE_MENU_PREFIX = "rss:remove"
         private const val MAX_REMOVE_OPTIONS = 25
         private const val MAX_AUTOCOMPLETE_CHOICES = 25
-
-        fun onSelectInteraction(event: StringSelectInteractionEvent) {
-            val context = parseRemoveMenuContext(event.componentId) ?: return
-            if (event.values.isEmpty()) {
-                event.reply("Missing RSS feed selection.").setEphemeral(true).queue()
-                return
-            }
-            if (event.guild?.idLong != context.guildId) {
-                event.reply("This selector is no longer valid in this server.").setEphemeral(true).queue()
-                return
-            }
-            if (event.user.idLong != context.userId) {
-                event.reply("Only the user who opened this selector can use it.").setEphemeral(true).queue()
-                return
-            }
-
-            val guild = event.guild ?: run {
-                event.reply("This action can only be used in a server.").setEphemeral(true).queue()
-                return
-            }
-            val index = event.values.first().toIntOrNull() ?: run {
-                event.reply("Invalid RSS feed selection.").setEphemeral(true).queue()
-                return
-            }
-
-            val feeds = RssFeedService.getFeeds()
-            val feed = feeds.getOrNull(index)
-            if (feed == null || feed.guildId != guild.idLong) {
-                event.editMessage("That RSS feed no longer exists.").setComponents().queue()
-                return
-            }
-
-            RssFeedService.replaceFeeds(feeds.filterIndexed { currentIndex, _ -> currentIndex != index })
-            event.editMessage("RSS feed removed: ${feedSummary(feed)}").setComponents().queue()
-        }
 
         private fun channelOption(required: Boolean): OptionData {
             return OptionData(OptionType.CHANNEL, "channel", "Channel to post new entries in", required)
@@ -133,22 +102,47 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
             return "`${feed.name}` -> <#${feed.channelId}> | ${feed.url} | regex: `$regexSummary`"
         }
 
-        private data class RemoveMenuContext(
-            val guildId: Long,
-            val userId: Long
-        )
+        private object RemoveMenuHandler : OwnedStringSelectHandler(
+            prefix = REMOVE_MENU_PREFIX,
+            missingSelectionMessage = "Missing RSS feed selection."
+        ) {
+            fun open(event: SlashCommandInteractionEvent, guild: Guild, entries: List<IndexedValue<RssFeed>>) {
+                replyWithOwnedMenu(
+                    event = event,
+                    guildId = guild.idLong,
+                    userId = event.user.idLong,
+                    prompt = "Select an RSS feed to remove.",
+                    placeholder = "Select an RSS feed to remove",
+                    options = entries.map { entry ->
+                        SelectOption.of(feedChoiceLabel(entry.index, entry.value), entry.index.toString())
+                            .withDescription(entry.value.url.take(100))
+                    },
+                    maxOptions = MAX_REMOVE_OPTIONS,
+                    overflowSuffix = { _, shown -> "\nOnly the first $shown feeds are shown." }
+                )
+            }
 
-        private fun parseRemoveMenuContext(componentId: String): RemoveMenuContext? {
-            val parts = componentId.split(':')
-            if (parts.size != 4) {
-                return null
+            override fun onSelection(
+                event: StringSelectInteractionEvent,
+                guild: Guild,
+                selectedValue: String,
+                context: ScopedInteractionId
+            ) {
+                val index = selectedValue.toIntOrNull() ?: run {
+                    event.reply("Invalid RSS feed selection.").setEphemeral(true).queue()
+                    return
+                }
+
+                val feeds = RssFeedService.getFeeds()
+                val feed = feeds.getOrNull(index)
+                if (feed == null || feed.guildId != guild.idLong) {
+                    event.editMessage("That RSS feed no longer exists.").setComponents().queue()
+                    return
+                }
+
+                RssFeedService.replaceFeeds(feeds.filterIndexed { currentIndex, _ -> currentIndex != index })
+                event.editMessage("RSS feed removed: ${feedSummary(feed)}").setComponents().queue()
             }
-            if (parts[0] != "rss" || parts[1] != "remove") {
-                return null
-            }
-            val guildId = parts[2].toLongOrNull() ?: return null
-            val userId = parts[3].toLongOrNull() ?: return null
-            return RemoveMenuContext(guildId, userId)
         }
     }
 
@@ -215,21 +209,7 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
             return
         }
 
-        val removeMenuId = "$REMOVE_MENU_PREFIX:${guild.idLong}:${event.user.idLong}"
-        val menu = StringSelectMenu.create(removeMenuId)
-            .setPlaceholder("Select an RSS feed to remove")
-            .setRequiredRange(1, 1)
-
-        entries.take(MAX_REMOVE_OPTIONS).forEach { entry ->
-            val description = entry.value.url.take(100)
-            menu.addOption(feedChoiceLabel(entry.index, entry.value), entry.index.toString(), description)
-        }
-
-        val suffix = if (entries.size > MAX_REMOVE_OPTIONS) "\nOnly the first $MAX_REMOVE_OPTIONS feeds are shown." else ""
-        event.reply("Select an RSS feed to remove.$suffix")
-            .addComponents(ActionRow.of(menu.build()))
-            .setEphemeral(true)
-            .queue()
+        RemoveMenuHandler.open(event, guild, entries)
     }
 
     private fun list(event: SlashCommandInteractionEvent, guild: Guild) {

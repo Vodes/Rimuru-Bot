@@ -1,7 +1,6 @@
 package pw.vodes.rimuru.command.generic.setup
 
-import net.dv8tion.jda.api.components.actionrow.ActionRow
-import net.dv8tion.jda.api.components.selections.StringSelectMenu
+import net.dv8tion.jda.api.components.selections.SelectOption
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel
@@ -10,10 +9,16 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 import pw.vodes.rimuru.config.AutoRoleConfig
 import pw.vodes.rimuru.config.ConfigService
 import pw.vodes.rimuru.util.DiscordMessageLinks
+import pw.vodes.rimuru.util.OwnedStringSelectHandler
+import pw.vodes.rimuru.util.ScopedInteractionId
 
 object SetupAutoroleGroup : SetupCommandGroupHandler {
     private const val REMOVE_MENU_PREFIX = "setup:autorole:remove"
     private const val MAX_REMOVE_OPTIONS = 25
+
+    init {
+        RemoveMenuHandler
+    }
 
     override fun handle(event: SlashCommandInteractionEvent, guild: Guild, subcommand: String) {
         when (subcommand) {
@@ -22,51 +27,6 @@ object SetupAutoroleGroup : SetupCommandGroupHandler {
             "list" -> list(event, guild)
             else -> event.reply("Unknown autorole subcommand.").setEphemeral(true).queue()
         }
-    }
-
-    fun onSelectInteraction(event: StringSelectInteractionEvent) {
-        val context = parseRemoveMenuContext(event.componentId) ?: return
-        if (event.values.isEmpty()) {
-            event.reply("Missing autorole selection.").setEphemeral(true).queue()
-            return
-        }
-        if (event.guild?.idLong != context.guildId) {
-            event.reply("This selector is no longer valid in this server.").setEphemeral(true).queue()
-            return
-        }
-        if (event.user.idLong != context.userId) {
-            event.reply("Only the user who opened this selector can use it.").setEphemeral(true).queue()
-            return
-        }
-
-        val key = parseAutoRoleKey(event.values.first()) ?: run {
-            event.reply("Invalid selection payload.").setEphemeral(true).queue()
-            return
-        }
-
-        val guild = event.guild ?: run {
-            event.reply("This action can only be used in a server.").setEphemeral(true).queue()
-            return
-        }
-
-        val config = ConfigService.getGuildConfigBlocking(guild.idLong)
-        val exists = config.autoroles.any { it.channelId == key.channelId && it.messageId == key.messageId && it.roleId == key.roleId }
-        if (!exists) {
-            event.editMessage("That autorole entry no longer exists.").setComponents().queue()
-            return
-        }
-
-        ConfigService.updateGuildConfigBlocking(guild.idLong) { current ->
-            current.copy(autoroles = current.autoroles.filterNot {
-                it.channelId == key.channelId && it.messageId == key.messageId && it.roleId == key.roleId
-            })
-        }
-
-        val roleText = guild.getRoleById(key.roleId)?.asMention ?: "`${key.roleId}`"
-        val messageLink = "https://discord.com/channels/${guild.id}/${key.channelId}/${key.messageId}"
-        event.editMessage("Autorole removed: $roleText -> $messageLink")
-            .setComponents()
-            .queue()
     }
 
     private fun add(event: SlashCommandInteractionEvent, guild: Guild) {
@@ -105,23 +65,7 @@ object SetupAutoroleGroup : SetupCommandGroupHandler {
             return
         }
 
-        val removeMenuId = "$REMOVE_MENU_PREFIX:${guild.idLong}:${event.user.idLong}"
-        val menu = StringSelectMenu.create(removeMenuId)
-            .setPlaceholder("Select an autorole to remove")
-            .setRequiredRange(1, 1)
-
-        entries.take(MAX_REMOVE_OPTIONS).forEach { entry ->
-            val roleName = guild.getRoleById(entry.roleId)?.name ?: "Missing role"
-            val optionValue = encodeAutoRoleKey(entry.channelId, entry.messageId, entry.roleId)
-            val optionDescription = "Message ${entry.messageId} in channel ${entry.channelId}"
-            menu.addOption(roleName, optionValue, optionDescription)
-        }
-
-        val suffix = if (entries.size > MAX_REMOVE_OPTIONS) "\nOnly the first $MAX_REMOVE_OPTIONS entries are shown." else ""
-        event.reply("Select an autorole entry to remove.$suffix")
-            .addComponents(ActionRow.of(menu.build()))
-            .setEphemeral(true)
-            .queue()
+        RemoveMenuHandler.open(event, guild, entries)
     }
 
     private fun list(event: SlashCommandInteractionEvent, guild: Guild) {
@@ -167,29 +111,11 @@ object SetupAutoroleGroup : SetupCommandGroupHandler {
         val link: DiscordMessageLinks.MessageLink
     )
 
-    private data class RemoveMenuContext(
-        val guildId: Long,
-        val userId: Long
-    )
-
     private data class AutoRoleKey(
         val channelId: Long,
         val messageId: Long,
         val roleId: Long
     )
-
-    private fun parseRemoveMenuContext(componentId: String): RemoveMenuContext? {
-        val parts = componentId.split(':')
-        if (parts.size != 5) {
-            return null
-        }
-        if (parts[0] != "setup" || parts[1] != "autorole" || parts[2] != "remove") {
-            return null
-        }
-        val guildId = parts[3].toLongOrNull() ?: return null
-        val userId = parts[4].toLongOrNull() ?: return null
-        return RemoveMenuContext(guildId, userId)
-    }
 
     private fun encodeAutoRoleKey(channelId: Long, messageId: Long, roleId: Long): String {
         return "$channelId:$messageId:$roleId"
@@ -204,5 +130,60 @@ object SetupAutoroleGroup : SetupCommandGroupHandler {
         val messageId = parts[1].toLongOrNull() ?: return null
         val roleId = parts[2].toLongOrNull() ?: return null
         return AutoRoleKey(channelId, messageId, roleId)
+    }
+
+    private object RemoveMenuHandler : OwnedStringSelectHandler(
+        prefix = REMOVE_MENU_PREFIX,
+        missingSelectionMessage = "Missing autorole selection."
+    ) {
+        fun open(event: SlashCommandInteractionEvent, guild: Guild, entries: List<AutoRoleConfig>) {
+            replyWithOwnedMenu(
+                event = event,
+                guildId = guild.idLong,
+                userId = event.user.idLong,
+                prompt = "Select an autorole entry to remove.",
+                placeholder = "Select an autorole to remove",
+                options = entries.map { entry ->
+                    val roleName = guild.getRoleById(entry.roleId)?.name ?: "Missing role"
+                    SelectOption.of(roleName, encodeAutoRoleKey(entry.channelId, entry.messageId, entry.roleId))
+                        .withDescription("Message ${entry.messageId} in channel ${entry.channelId}")
+                },
+                maxOptions = MAX_REMOVE_OPTIONS,
+                overflowSuffix = { _, shown -> "\nOnly the first $shown entries are shown." }
+            )
+        }
+
+        override fun onSelection(
+            event: StringSelectInteractionEvent,
+            guild: Guild,
+            selectedValue: String,
+            context: ScopedInteractionId
+        ) {
+            val key = parseAutoRoleKey(selectedValue) ?: run {
+                event.reply("Invalid selection payload.").setEphemeral(true).queue()
+                return
+            }
+
+            val config = ConfigService.getGuildConfigBlocking(guild.idLong)
+            val exists = config.autoroles.any {
+                it.channelId == key.channelId && it.messageId == key.messageId && it.roleId == key.roleId
+            }
+            if (!exists) {
+                event.editMessage("That autorole entry no longer exists.").setComponents().queue()
+                return
+            }
+
+            ConfigService.updateGuildConfigBlocking(guild.idLong) { current ->
+                current.copy(autoroles = current.autoroles.filterNot {
+                    it.channelId == key.channelId && it.messageId == key.messageId && it.roleId == key.roleId
+                })
+            }
+
+            val roleText = guild.getRoleById(key.roleId)?.asMention ?: "`${key.roleId}`"
+            val messageLink = "https://discord.com/channels/${guild.id}/${key.channelId}/${key.messageId}"
+            event.editMessage("Autorole removed: $roleText -> $messageLink")
+                .setComponents()
+                .queue()
+        }
     }
 }
