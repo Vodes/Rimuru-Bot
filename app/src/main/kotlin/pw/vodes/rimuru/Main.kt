@@ -10,6 +10,7 @@ import pw.vodes.rimuru.listeners.ListenerMessages
 import pw.vodes.rimuru.listeners.ListenerSlashAutoComplete
 import pw.vodes.rimuru.listeners.ListenerGuilds
 import pw.vodes.rimuru.listeners.ListenerSlashInteraction
+import pw.vodes.rimuru.services.logging.MemberLogService
 import pw.vodes.rimuru.services.rss.RssFeedService
 import pw.vodes.rimuru.services.styx.StyxProfileService
 import pw.vodes.rimuru.services.verification.UnverifiedPurgeService
@@ -46,6 +47,7 @@ fun main() {
     UnverifiedPurgeService.start()
 
     Runtime.getRuntime().addShutdownHook(Thread {
+        MemberLogService.shutdown()
         RssFeedService.shutdown()
         UnverifiedPurgeService.shutdown()
         VerificationService.shutdown()

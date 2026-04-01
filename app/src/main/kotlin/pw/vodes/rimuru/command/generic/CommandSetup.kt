@@ -1,8 +1,10 @@
 package pw.vodes.rimuru.command.generic
 
 import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
+import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData
 import pw.vodes.rimuru.command.Command
@@ -10,13 +12,15 @@ import pw.vodes.rimuru.command.CommandType
 import pw.vodes.rimuru.command.generic.setup.SetupAdminRoleGroup
 import pw.vodes.rimuru.command.generic.setup.SetupAutoroleGroup
 import pw.vodes.rimuru.command.generic.setup.SetupCommandGroupHandler
+import pw.vodes.rimuru.command.generic.setup.SetupLoggingGroup
 import pw.vodes.rimuru.command.generic.setup.SetupVerificationGroup
 
 class CommandSetup : Command("setup", CommandType.ADMIN, "Configure this server") {
     private val handlers: Map<String, SetupCommandGroupHandler> = mapOf(
         "adminrole" to SetupAdminRoleGroup,
         "verification" to SetupVerificationGroup,
-        "autorole" to SetupAutoroleGroup
+        "autorole" to SetupAutoroleGroup,
+        "logging" to SetupLoggingGroup
     )
 
     override fun guildOnly() = true
@@ -64,6 +68,14 @@ class CommandSetup : Command("setup", CommandType.ADMIN, "Configure this server"
                         .addOption(OptionType.ROLE, "role", "Role to add/remove on reaction add/remove", true),
                     SubcommandData("remove", "Open selector to remove an autorole entry"),
                     SubcommandData("list", "List configured autorole entries")
+                ),
+            SubcommandGroupData("logging", "Configure guild logging channels")
+                .addSubcommands(
+                    SubcommandData("user", "Set or clear the user join/leave logging channel")
+                        .addOptions(loggingChannelOption()),
+                    SubcommandData("exception", "Set or clear the exception logging channel")
+                        .addOptions(loggingChannelOption()),
+                    SubcommandData("status", "Show current logging channel settings")
                 )
         )
 
@@ -85,5 +97,10 @@ class CommandSetup : Command("setup", CommandType.ADMIN, "Configure this server"
 
         handlers[group]?.handle(event, guildContext.guild, subcommand)
             ?: event.reply("Unknown setup group.").setEphemeral(true).queue()
+    }
+
+    private fun loggingChannelOption(): OptionData {
+        return OptionData(OptionType.CHANNEL, "channel", "Message channel to use; omit to disable", false)
+            .setChannelTypes(ChannelType.TEXT, ChannelType.NEWS)
     }
 }
