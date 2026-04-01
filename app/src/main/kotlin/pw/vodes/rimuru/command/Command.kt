@@ -96,6 +96,7 @@ object CommandCollection {
         commands.add(CommandUserInfo())
         commands.add(CommandStealEmote())
         commands.add(CommandSetup())
+        commands.add(CommandRss())
         commands.add(CommandClear())
         commands.add(CommandRestart())
     }

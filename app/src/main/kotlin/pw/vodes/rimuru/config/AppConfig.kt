@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AppConfig(
     val styxEnabledGuildId: Long? = null,
-    val styxConfig: StyxConfig = StyxConfig()
+    val styxConfig: StyxConfig = StyxConfig(),
+    val u2Passkey: String = ""
 )

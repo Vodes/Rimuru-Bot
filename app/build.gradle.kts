@@ -21,6 +21,8 @@ dependencies {
     implementation(libs.kstore)
     implementation(libs.kstore.file)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.rssreader)
+    implementation(libs.unbescape)
 }
 
 java {

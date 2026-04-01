@@ -18,9 +18,12 @@ object ConfigService {
     private val configRoot: Path = resolveConfigRoot()
     private val guildConfigRoot: Path = Path(configRoot, "guilds")
     private val appConfigFile: Path = Path(configRoot, "app-config.json")
+    private val rssConfigFile: Path = Path(configRoot, "rssfeeds.json")
 
     private val appStore: KStore<AppConfig> =
         storeOf(appConfigFile, AppConfig(), true, json)
+    private val rssStore: KStore<RssConfig> =
+        storeOf(rssConfigFile, RssConfig(), true, json)
 
     private val guildStores = ConcurrentHashMap<Long, KStore<GuildConfig>>()
 
@@ -51,6 +54,9 @@ object ConfigService {
         if (!SystemFileSystem.exists(appConfigFile)) {
             appStore.set(AppConfig())
         }
+        if (!SystemFileSystem.exists(rssConfigFile)) {
+            rssStore.set(RssConfig())
+        }
     }
 
     fun initBlocking() = runBlocking { init() }
@@ -65,6 +71,18 @@ object ConfigService {
 
     fun updateAppConfigBlocking(transform: (AppConfig) -> AppConfig) = runBlocking {
         updateAppConfig(transform)
+    }
+
+    suspend fun getRssConfig(): RssConfig = rssStore.get() ?: RssConfig()
+
+    fun getRssConfigBlocking(): RssConfig = runBlocking { getRssConfig() }
+
+    suspend fun updateRssConfig(transform: (RssConfig) -> RssConfig) {
+        rssStore.update { current -> transform(current ?: RssConfig()) }
+    }
+
+    fun updateRssConfigBlocking(transform: (RssConfig) -> RssConfig) = runBlocking {
+        updateRssConfig(transform)
     }
 
     private fun guildStore(guildId: Long): KStore<GuildConfig> {
@@ -92,6 +110,7 @@ object ConfigService {
 
     fun shutdown() {
         appStore.close()
+        rssStore.close()
         guildStores.values.forEach { it.close() }
         guildStores.clear()
     }

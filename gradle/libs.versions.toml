@@ -6,6 +6,8 @@ jda-ktx = "0.14.2"
 buildconfig = "5.3.5"
 kstore = "1.0.0"
 kotlinx-serialization-json = "1.9.0"
+rssreader = "3.6.0"
+unbescape = "1.1.6.RELEASE"
 
 [libraries]
 kord = { module = "dev.kord:kord-core", version.ref = "kord" }
@@ -15,6 +17,8 @@ junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", vers
 kstore = { module = "io.github.xxfast:kstore", version.ref = "kstore" }
 kstore-file = { module = "io.github.xxfast:kstore-file", version.ref = "kstore" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+rssreader = { module = "com.apptasticsoftware:rssreader", version.ref = "rssreader" }
+unbescape = { module = "org.unbescape:unbescape", version.ref = "unbescape" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.3.0" }
