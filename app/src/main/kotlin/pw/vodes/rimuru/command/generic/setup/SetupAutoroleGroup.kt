@@ -146,7 +146,7 @@ object SetupAutoroleGroup : SetupCommandGroupHandler {
                 options = entries.map { entry ->
                     val roleName = guild.getRoleById(entry.roleId)?.name ?: "Missing role"
                     SelectOption.of(roleName, encodeAutoRoleKey(entry.channelId, entry.messageId, entry.roleId))
-                        .withDescription("Message ${entry.messageId} in channel ${entry.channelId}")
+                        .withDescription("In ${guild.getTextChannelById(entry.channelId)?.name?.let { "#$it" } ?: "Unknown channel"}")
                 },
                 maxOptions = MAX_REMOVE_OPTIONS,
                 overflowSuffix = { _, shown -> "\nOnly the first $shown entries are shown." }
