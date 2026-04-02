@@ -123,11 +123,14 @@ object VerificationService {
         message.createThreadChannel("verify-${member.effectiveName.take(70)}").queue(
             { thread ->
                 pending.remove(key)
-                val timeout = scheduler.schedule(
-                    { timeoutChallenge(key) },
+                val timeout = scheduleSafely(
+                    key.guildId,
+                    "Verification: challenge timeout task failed",
                     CHALLENGE_TIMEOUT_SECONDS,
                     TimeUnit.SECONDS
-                )
+                ) {
+                    timeoutChallenge(key)
+                }
                 val session = ChallengeSession(
                     guildId = key.guildId,
                     userId = key.userId,
@@ -295,5 +298,19 @@ object VerificationService {
 
     private fun reportFailure(guildId: Long, source: String): (Throwable) -> Unit {
         return { error -> GuildExceptionLogService.report(guildId, source, error) }
+    }
+
+    private fun scheduleSafely(
+        guildId: Long,
+        source: String,
+        delay: Long,
+        unit: TimeUnit,
+        action: () -> Unit
+    ): ScheduledFuture<*> {
+        return scheduler.schedule(
+            { runCatching(action).onFailure(reportFailure(guildId, source)) },
+            delay,
+            unit
+        )
     }
 }

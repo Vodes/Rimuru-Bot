@@ -105,7 +105,10 @@ object UnverifiedPurgeService {
         fastPurgeTasks.remove(key)?.cancel(false)
         fastPurgeTasks[key] = scheduler.schedule({
             try {
-                runFastPurge(key)
+                runCatching { runFastPurge(key) }
+                    .onFailure {
+                        GuildExceptionLogService.report(key.guildId, "Unverified purge: fast purge task failed", it)
+                    }
             } finally {
                 fastPurgeTasks.remove(key)
             }
