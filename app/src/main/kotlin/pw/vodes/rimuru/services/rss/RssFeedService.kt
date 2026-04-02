@@ -26,7 +26,7 @@ object RssFeedService {
             }
 
             task = scheduler.scheduleWithFixedDelay(
-                { runCatching { pollFeeds() }.onFailure { reportRssException(it, "RSS poll loop failed") } },
+                { runCatching { pollFeeds() }.onFailure { reportPollLoopException(it) } },
                 INITIAL_DELAY_SECONDS,
                 POLL_INTERVAL_MINUTES * 60,
                 TimeUnit.SECONDS
@@ -66,7 +66,12 @@ object RssFeedService {
         updatedFeeds.indices.forEach { index ->
             val current = updatedFeeds[index]
             println("Checking RSS feed: ${current.name}")
-            updatedFeeds[index] = current.check(u2Passkey)
+            updatedFeeds[index] = runCatching {
+                current.check(u2Passkey)
+            }.getOrElse { exception ->
+                reportRssException(exception, "Polling RSS feed ${current.name} failed", current.guildId)
+                current
+            }
             synchronized(lock) {
                 feeds = updatedFeeds.toList()
             }
@@ -87,5 +92,9 @@ object RssFeedService {
         ConfigService.updateRssConfigBlocking { current ->
             current.copy(feeds = feedsToSave.toList())
         }
+    }
+
+    private fun reportPollLoopException(exception: Throwable) {
+        reportRssException(exception, "RSS poll loop failed")
     }
 }

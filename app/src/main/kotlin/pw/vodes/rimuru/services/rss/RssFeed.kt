@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel
 import org.unbescape.html.HtmlEscape
 import pw.vodes.rimuru.Main
+import pw.vodes.rimuru.services.logging.GuildExceptionLogService
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -44,11 +45,11 @@ data class RssFeed(
                         updatedItems.add(feedItem)
                     }
                 } catch (exception: Exception) {
-                    reportRssException(exception, "Parsing posts for $name")
+                    reportRssException(exception, "Parsing posts for $name", guildId)
                 }
             }
         } catch (exception: Exception) {
-            reportRssException(exception, "Retrieving posts for $name")
+            reportRssException(exception, "Retrieving posts for $name", guildId)
         }
 
         val trimmedItems = updatedItems
@@ -83,7 +84,11 @@ data class RssFeed(
 
     private fun postNew(updatedItems: MutableList<RssFeedItem>): Boolean {
         val channel = resolveChannel() ?: run {
-            reportRssException(IllegalStateException("Channel $channelId not found in guild $guildId"), "Could not resolve channel for RSS feed $name")
+            reportRssException(
+                IllegalStateException("Channel $channelId not found in guild $guildId"),
+                "Could not resolve channel for RSS feed $name",
+                guildId
+            )
             return false
         }
         val isU2 = url.contains("u2.dmhy.org", ignoreCase = true)
@@ -99,15 +104,18 @@ data class RssFeed(
                 continue
             }
 
-            val embed = buildEmbed(item, isU2, isNyaa)
             try {
+                val embed = buildEmbed(item, isU2, isNyaa)
                 val message = channel.sendMessageEmbeds(embed.build()).complete()
                 if (channel is NewsChannel) {
-                    message.crosspost().queue()
+                    message.crosspost().queue(
+                        null,
+                        { error -> reportRssException(error, "Could not crosspost RSS item with URL: ${item.getPostUrl()}", guildId) }
+                    )
                 }
                 updatedItems[index] = item.copy(wasPosted = true)
             } catch (exception: Exception) {
-                reportRssException(exception, "Could not post RSS item with URL: ${item.getPostUrl()}")
+                reportRssException(exception, "Could not post RSS item with URL: ${item.getPostUrl()}", guildId)
             }
         }
 
@@ -158,7 +166,8 @@ private fun String.lightEscapeURL(): String {
         .replace("|", "%7C")
 }
 
-internal fun reportRssException(exception: Throwable, context: String) {
+internal fun reportRssException(exception: Throwable, context: String, guildId: Long? = null) {
     System.err.println("[rss] $context")
     exception.printStackTrace()
+    GuildExceptionLogService.report("RSS: $context", exception, guildId)
 }

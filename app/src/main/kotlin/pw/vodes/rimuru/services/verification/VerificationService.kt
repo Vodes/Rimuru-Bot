@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction
 import pw.vodes.rimuru.Main
 import pw.vodes.rimuru.config.ConfigService
+import pw.vodes.rimuru.services.logging.GuildExceptionLogService
 import java.security.SecureRandom
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
@@ -64,7 +65,10 @@ object VerificationService {
 
         event.retrieveMessage().queue(
             { message -> createChallengeThread(message, member, key, verificationRoleId) },
-            { pending.remove(key) }
+            {
+                pending.remove(key)
+                reportFailure(guild.idLong, "Verification: failed to retrieve verification message")(it)
+            }
         )
     }
 
@@ -138,9 +142,12 @@ object VerificationService {
                 activeByThread[thread.idLong] = key
 
                 thread.sendMessage("${member.asMention} ${challenge.question} You have $CHALLENGE_VISIBLE_SECONDS seconds.")
-                    .queue()
+                    .queue(null, reportFailure(key.guildId, "Verification: failed to send challenge prompt"))
             },
-            { pending.remove(key) }
+            {
+                pending.remove(key)
+                reportFailure(key.guildId, "Verification: failed to create challenge thread")(it)
+            }
         )
     }
 
@@ -188,6 +195,7 @@ object VerificationService {
                 (event.guild.getThreadChannelById(session.threadId))?.delete()?.queueAfter(2, TimeUnit.SECONDS)
             },
             {
+                reportFailure(event.guild.idLong, "Verification: failed to assign verification role")(it)
                 event.channel.sendMessage("Failed to assign verification role.").queue()
                 (event.guild.getThreadChannelById(session.threadId))?.delete()?.queueAfter(2, TimeUnit.SECONDS)
             }
@@ -252,7 +260,7 @@ object VerificationService {
         member ?: return
         member.timeoutFor(FAILED_VERIFICATION_TIMEOUT_MINUTES, TimeUnit.MINUTES)
             .reason("Failed verification")
-            .queue()
+            .queue(null, reportFailure(member.guild.idLong, "Verification: failed to timeout member"))
     }
 
     private fun formatFailedAnswer(answer: Double, hardmode: Boolean): String {
@@ -281,6 +289,11 @@ object VerificationService {
             .setFooter("UserID: ${user.id}")
             .build()
 
-        hallOfShameChannel.sendMessageEmbeds(embed).queue()
+        hallOfShameChannel.sendMessageEmbeds(embed)
+            .queue(null, reportFailure(event.guild.idLong, "Verification: failed to post hall of shame embed"))
+    }
+
+    private fun reportFailure(guildId: Long, source: String): (Throwable) -> Unit {
+        return { error -> GuildExceptionLogService.report(guildId, source, error) }
     }
 }

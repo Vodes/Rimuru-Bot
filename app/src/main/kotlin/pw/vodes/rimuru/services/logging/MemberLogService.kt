@@ -116,7 +116,7 @@ object MemberLogService {
 
     private fun baseUserEmbed(user: User): EmbedBuilder {
         return EmbedBuilder()
-            .setThumbnail(user.effectiveAvatarUrl)
+            .setThumbnail(user.effectiveAvatar.getUrl(4096))
             .setTitle(user.name)
             .setFooter("ID: ${user.id}")
     }

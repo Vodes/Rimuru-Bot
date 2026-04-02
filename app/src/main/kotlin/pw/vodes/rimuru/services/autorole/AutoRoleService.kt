@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent
 import pw.vodes.rimuru.config.AutoRoleConfig
 import pw.vodes.rimuru.config.ConfigService
+import pw.vodes.rimuru.services.logging.GuildExceptionLogService
 
 object AutoRoleService {
     fun onReactionAdd(event: MessageReactionAddEvent) {
@@ -18,7 +19,18 @@ object AutoRoleService {
 
         entries.forEach { entry ->
             val role = event.guild.getRoleById(entry.roleId) ?: return@forEach
-            event.guild.addRoleToMember(member, role).reason("Autorole reaction add").queue()
+            event.guild.addRoleToMember(member, role)
+                .reason("Autorole reaction add")
+                .queue(
+                    null,
+                    { error ->
+                        GuildExceptionLogService.report(
+                            event.guild.idLong,
+                            "Autorole: failed to add role ${role.id}",
+                            error
+                        )
+                    }
+                )
         }
     }
 
@@ -34,7 +46,18 @@ object AutoRoleService {
         event.retrieveMember().queue { member ->
             entries.forEach { entry ->
                 val role = event.guild.getRoleById(entry.roleId) ?: return@forEach
-                event.guild.removeRoleFromMember(member, role).reason("Autorole reaction remove").queue()
+                event.guild.removeRoleFromMember(member, role)
+                    .reason("Autorole reaction remove")
+                    .queue(
+                        null,
+                        { error ->
+                            GuildExceptionLogService.report(
+                                event.guild.idLong,
+                                "Autorole: failed to remove role ${role.id}",
+                                error
+                            )
+                        }
+                    )
             }
         }
     }

@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Guild
 import pw.vodes.rimuru.Main
 import pw.vodes.rimuru.config.ConfigService
+import pw.vodes.rimuru.services.logging.GuildExceptionLogService
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
@@ -27,7 +28,7 @@ object UnverifiedPurgeService {
         }
 
         task = scheduler.scheduleAtFixedRate(
-            { runCatching { purgeUnverifiedMembers() } },
+            { runCatching { purgeUnverifiedMembers() }.onFailure { GuildExceptionLogService.report("Unverified purge loop failed", it) } },
             30,
             CHECK_INTERVAL_MINUTES * 60,
             TimeUnit.SECONDS
@@ -59,26 +60,8 @@ object UnverifiedPurgeService {
 
     private fun purgeUnverifiedMembers() {
         Main.jda.guilds.forEach { guild ->
-            val config = ConfigService.getGuildConfigBlocking(guild.idLong)
-            val roleId = config.verificationRoleId ?: return@forEach
-            val days = config.purgeUnverifiedAfterDays
-            if (days <= 0) {
-                return@forEach
-            }
-
-            val role = guild.getRoleById(roleId) ?: return@forEach
-
-            val cutoff = OffsetDateTime.now().minusDays(days.toLong())
-            val adminRoleIds = config.adminRoleIds
-            val members = runCatching { guild.loadMembers().get() }.getOrNull()
-                ?: return@forEach
-
-            members
-                .asSequence()
-                .filter { shouldKickMember(it, guild.ownerIdLong, role.idLong, adminRoleIds, cutoff) }
-                .forEach { member ->
-                    guild.kick(member).reason("Unverified for $days+ days").queue()
-                }
+            runCatching { purgeGuild(guild) }
+                .onFailure { GuildExceptionLogService.report(guild.idLong, "Unverified purge: guild sweep failed", it) }
         }
     }
 
@@ -145,7 +128,54 @@ object UnverifiedPurgeService {
             return
         }
 
-        guild.kick(member).reason("Unverified for ${FAST_PURGE_SECONDS}+ seconds").queue()
+        guild.kick(member)
+            .reason("Unverified for ${FAST_PURGE_SECONDS}+ seconds")
+            .queue(
+                null,
+                { error ->
+                    GuildExceptionLogService.report(
+                        guild.idLong,
+                        "Unverified purge: failed to kick member ${member.id} in fast purge",
+                        error
+                    )
+                }
+            )
+    }
+
+    private fun purgeGuild(guild: Guild) {
+        val config = ConfigService.getGuildConfigBlocking(guild.idLong)
+        val roleId = config.verificationRoleId ?: return
+        val days = config.purgeUnverifiedAfterDays
+        if (days <= 0) {
+            return
+        }
+
+        val role = guild.getRoleById(roleId) ?: return
+        val cutoff = OffsetDateTime.now().minusDays(days.toLong())
+        val members = runCatching { guild.loadMembers().get() }
+            .onFailure {
+                GuildExceptionLogService.report(guild.idLong, "Unverified purge: failed to load members", it)
+            }
+            .getOrNull()
+            ?: return
+
+        members
+            .asSequence()
+            .filter { shouldKickMember(it, guild.ownerIdLong, role.idLong, config.adminRoleIds, cutoff) }
+            .forEach { member ->
+                guild.kick(member)
+                    .reason("Unverified for $days+ days")
+                    .queue(
+                        null,
+                        { error ->
+                            GuildExceptionLogService.report(
+                                guild.idLong,
+                                "Unverified purge: failed to kick member ${member.id}",
+                                error
+                            )
+                        }
+                    )
+            }
     }
 
     private data class MemberKey(val guildId: Long, val userId: Long)

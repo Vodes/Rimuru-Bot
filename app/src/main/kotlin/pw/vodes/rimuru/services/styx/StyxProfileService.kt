@@ -3,6 +3,7 @@ package pw.vodes.rimuru.services.styx
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Icon
 import pw.vodes.rimuru.config.ConfigService
+import pw.vodes.rimuru.services.logging.GuildExceptionLogService
 import java.net.URI
 
 object StyxProfileService {
@@ -27,7 +28,7 @@ object StyxProfileService {
         }
 
         val avatar = if (guild.idLong == styxGuildId) {
-            loadIcon(styxConfig.botAvatarUrl.trim())
+            loadIcon(guild.idLong, styxConfig.botAvatarUrl.trim())
         } else {
             null
         }
@@ -36,22 +37,25 @@ object StyxProfileService {
             .setNickname(nickname)
             .queue(null) { error ->
                 System.err.println("Failed to update nickname for guild ${guild.id}: ${error.message}")
+                GuildExceptionLogService.report(guild.idLong, "Styx: failed to update nickname", error)
             }
 
         guild.selfMember.manager
             .setAvatar(avatar)
             .queue(null) { error ->
                 System.err.println("Failed to update avatar for guild ${guild.id}: ${error.message}")
+                GuildExceptionLogService.report(guild.idLong, "Styx: failed to update avatar", error)
             }
 
         guild.selfMember.manager
             .setBio(bio)
             .queue(null) { error ->
                 System.err.println("Failed to update bio for guild ${guild.id}: ${error.message}")
+                GuildExceptionLogService.report(guild.idLong, "Styx: failed to update bio", error)
             }
     }
 
-    private fun loadIcon(url: String): Icon? {
+    private fun loadIcon(guildId: Long, url: String): Icon? {
         if (url.isBlank()) {
             return null
         }
@@ -60,6 +64,7 @@ object StyxProfileService {
             URI(url).toURL().openStream().use(Icon::from)
         }.getOrElse { error ->
             System.err.println("Failed to load Styx avatar from '$url': ${error.message}")
+            GuildExceptionLogService.report(guildId, "Styx: failed to load avatar", error)
             null
         }
     }
