@@ -11,7 +11,6 @@ object GuildExceptionLogService {
     private const val PROJECT_PACKAGE = "pw.vodes.rimuru"
     private const val MAX_MESSAGE_LENGTH = 700
     private const val MAX_STACKTRACE_LENGTH = 1200
-    private const val MAX_PLAIN_TEXT_LENGTH = 1900
 
     fun report(guildId: Long, source: String, exception: Throwable): Boolean {
         return report(source, exception, guildId)
@@ -31,11 +30,7 @@ object GuildExceptionLogService {
     private fun trySend(channel: GuildMessageChannel?, source: String, exception: Throwable): Boolean {
         channel ?: return false
         return runCatching {
-            if (channel.guild.selfMember.hasPermission(channel, Permission.MESSAGE_EMBED_LINKS)) {
-                channel.sendMessageEmbeds(buildEmbed(source, exception).build()).complete()
-            } else {
-                channel.sendMessage(buildPlainText(source, exception)).complete()
-            }
+            channel.sendMessageEmbeds(buildEmbed(source, exception).build()).complete()
             true
         }.getOrDefault(false)
     }
@@ -44,13 +39,13 @@ object GuildExceptionLogService {
         val guild = Main.jda.getGuildById(guildId) ?: return null
         val channelId = ConfigService.getGuildConfigBlocking(guild.idLong).otherLogChannelId ?: return null
         val channel = guild.getChannelById(GuildMessageChannel::class.java, channelId) ?: return null
-        return channel.takeIf { guild.selfMember.hasPermission(it, Permission.MESSAGE_SEND) }
+        return channel.takeIf { guild.selfMember.hasPermission(it, Permission.MESSAGE_SEND, Permission.MESSAGE_EMBED_LINKS) }
     }
 
     private fun resolveGlobalExceptionLogChannel(): GuildMessageChannel? {
         val channelId = ConfigService.getAppConfigBlocking().globalExceptionLogChannelId ?: return null
         val channel = Main.jda.getChannelById(GuildMessageChannel::class.java, channelId) ?: return null
-        return channel.takeIf { it.guild.selfMember.hasPermission(it, Permission.MESSAGE_SEND) }
+        return channel.takeIf { it.guild.selfMember.hasPermission(it, Permission.MESSAGE_SEND, Permission.MESSAGE_EMBED_LINKS) }
     }
 
     private fun buildEmbed(source: String, exception: Throwable): EmbedBuilder {
@@ -71,28 +66,6 @@ object GuildExceptionLogService {
         } else {
             "$message\n```$trace```"
         }
-    }
-
-    private fun buildPlainText(source: String, exception: Throwable): String {
-        val exceptionName = exception.javaClass.simpleName.ifBlank { "Exception" }
-        val message = (exception.localizedMessage ?: exception.message ?: "No message")
-            .sanitizeForCodeBlock()
-        val trace = buildStackTraceSnippet(exception)
-        return buildString {
-            append("Exception thrown!")
-            append('\n')
-            append("Source: ")
-            append(source)
-            append('\n')
-            append(exceptionName)
-            append(": ")
-            append(message)
-            if (trace.isNotBlank()) {
-                append("\n```")
-                append(trace)
-                append("```")
-            }
-        }.truncate(MAX_PLAIN_TEXT_LENGTH)
     }
 
     private fun buildStackTraceSnippet(exception: Throwable): String {
