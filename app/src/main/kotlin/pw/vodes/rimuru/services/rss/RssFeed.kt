@@ -9,7 +9,6 @@ import org.unbescape.html.HtmlEscape
 import pw.vodes.rimuru.Main
 import pw.vodes.rimuru.services.logging.GuildExceptionLogService
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 @Serializable
 data class RssFeed(
@@ -93,16 +92,13 @@ data class RssFeed(
         }
         val isU2 = url.contains("u2.dmhy.org", ignoreCase = true)
         val isNyaa = url.contains("nyaa.si", ignoreCase = true)
-
+        var hasPostedOnce = false
         for ((index, item) in updatedItems.withIndex()) {
-            if (item.wasPosted) {
+            if (item.wasPosted)
                 continue
-            }
-            if (firstCheck && Instant.ofEpochSecond(item.getUnixPubTime())
-                    .isBefore(Instant.now().minus(24, ChronoUnit.HOURS))
-            ) {
-                continue
-            }
+
+            if (hasPostedOnce && firstCheck)
+                break
 
             try {
                 val embed = buildEmbed(item, isU2, isNyaa)
@@ -114,6 +110,7 @@ data class RssFeed(
                     )
                 }
                 updatedItems[index] = item.copy(wasPosted = true)
+                hasPostedOnce = true
             } catch (exception: Exception) {
                 reportRssException(exception, "Could not post RSS item with URL: ${item.getPostUrl()}", guildId)
             }
