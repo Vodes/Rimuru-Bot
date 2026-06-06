@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.buildconfig)
+    alias(libs.plugins.shadow)
     application
 }
 
@@ -31,6 +32,10 @@ java {
     }
 }
 
+base {
+    archivesName = rootProject.name.lowercase()
+}
+
 application {
     mainClass = "pw.vodes.rimuru.MainKt"
 }
@@ -43,4 +48,18 @@ buildConfig {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+}
+
+val shadowJar = tasks.named<Jar>("shadowJar")
+
+tasks.named<Delete>("clean") {
+    delete(layout.projectDirectory.file("app.jar"))
+}
+
+tasks.register<Copy>("shadowCI") {
+    description = "Builds the shadow jar as 'app.jar' in the project root."
+    dependsOn(shadowJar)
+    from(shadowJar.flatMap { it.archiveFile })
+    into(layout.projectDirectory)
+    rename { "app.jar" }
 }
