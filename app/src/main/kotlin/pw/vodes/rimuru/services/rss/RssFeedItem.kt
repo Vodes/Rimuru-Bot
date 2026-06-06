@@ -6,7 +6,9 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 private val imageUrlPattern =
-    "[(http(s)?):\\/\\/(www\\.)?a-zA-Z0-9@:%._\\-\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&\\/=]*)(.jpg|.png|.jpeg|.gif|.webp|.avif)".toRegex(RegexOption.IGNORE_CASE)
+    "[(http(s)?):\\/\\/(www\\.)?a-zA-Z0-9@:%._\\-\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&\\/=]*)(.jpg|.png|.jpeg|.gif|.webp|.avif)".toRegex(
+        RegexOption.IGNORE_CASE
+    )
 private val u2AttachImagePattern = "^attachments\\/\\d{6}\\/.*".toRegex(RegexOption.IGNORE_CASE)
 internal val u2PasskeyUrlPattern =
     "https?:\\/\\/u2\\.dmhy\\.org\\/torrentrss\\.php.*(passkey=[^& ]*).*".toRegex(RegexOption.IGNORE_CASE)

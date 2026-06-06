@@ -1,8 +1,8 @@
 package pw.vodes.rimuru.services.verification
 
 import net.dv8tion.jda.api.Permission
-import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.Member
 import pw.vodes.rimuru.Main
 import pw.vodes.rimuru.config.ConfigService
 import pw.vodes.rimuru.services.logging.GuildExceptionLogService

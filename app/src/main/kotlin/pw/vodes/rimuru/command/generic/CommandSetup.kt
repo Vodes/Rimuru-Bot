@@ -9,11 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData
 import pw.vodes.rimuru.command.Command
 import pw.vodes.rimuru.command.CommandType
-import pw.vodes.rimuru.command.generic.setup.SetupAdminRoleGroup
-import pw.vodes.rimuru.command.generic.setup.SetupAutoroleGroup
-import pw.vodes.rimuru.command.generic.setup.SetupCommandGroupHandler
-import pw.vodes.rimuru.command.generic.setup.SetupLoggingGroup
-import pw.vodes.rimuru.command.generic.setup.SetupVerificationGroup
+import pw.vodes.rimuru.command.generic.setup.*
 
 class CommandSetup : Command("setup", CommandType.ADMIN, "Configure this server") {
     private val handlers: Map<String, SetupCommandGroupHandler> = mapOf(

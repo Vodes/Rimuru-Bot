@@ -7,9 +7,13 @@ object InteractionDispatcher {
     private val stringSelectHandlers = linkedSetOf<StringSelectHandler>()
     private val modalHandlers = linkedSetOf<ModalHandler>()
 
-    fun registerStringSelect(handler: StringSelectHandler) { stringSelectHandlers += handler }
+    fun registerStringSelect(handler: StringSelectHandler) {
+        stringSelectHandlers += handler
+    }
 
-    fun registerModal(handler: ModalHandler) { modalHandlers += handler }
+    fun registerModal(handler: ModalHandler) {
+        modalHandlers += handler
+    }
 
     fun onStringSelect(event: StringSelectInteractionEvent) {
         val handler = stringSelectHandlers.firstOrNull { it.matches(event.componentId) } ?: return

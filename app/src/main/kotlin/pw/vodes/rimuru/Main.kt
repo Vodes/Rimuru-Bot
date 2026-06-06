@@ -5,11 +5,7 @@ import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.requests.GatewayIntent
 import pw.vodes.rimuru.command.CommandCollection
 import pw.vodes.rimuru.config.ConfigService
-import pw.vodes.rimuru.listeners.ListenerMembers
-import pw.vodes.rimuru.listeners.ListenerMessages
-import pw.vodes.rimuru.listeners.ListenerSlashAutoComplete
-import pw.vodes.rimuru.listeners.ListenerGuilds
-import pw.vodes.rimuru.listeners.ListenerSlashInteraction
+import pw.vodes.rimuru.listeners.*
 import pw.vodes.rimuru.services.logging.MemberLogService
 import pw.vodes.rimuru.services.rss.RssFeedService
 import pw.vodes.rimuru.services.styx.StyxProfileService

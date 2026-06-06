@@ -1,9 +1,9 @@
 package pw.vodes.rimuru.command.generic
 
+import net.dv8tion.jda.api.components.selections.SelectOption
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel
-import net.dv8tion.jda.api.components.selections.SelectOption
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
@@ -69,8 +69,8 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
             maxChoices = MAX_AUTOCOMPLETE_CHOICES,
             matches = { entry, query ->
                 query.isBlank()
-                    || entry.value.name.lowercase().contains(query)
-                    || entry.value.url.lowercase().contains(query)
+                        || entry.value.name.lowercase().contains(query)
+                        || entry.value.url.lowercase().contains(query)
             },
             toChoice = { entry -> Choice(feedChoiceLabel(entry.index, entry.value), entry.index.toString()) }
         )
