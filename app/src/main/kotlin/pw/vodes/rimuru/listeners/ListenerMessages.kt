@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import pw.vodes.rimuru.services.autorole.AutoRoleService
+import pw.vodes.rimuru.services.styx.StyxVotingService
 import pw.vodes.rimuru.services.verification.VerificationService
 
 class ListenerMessages : ListenerAdapter() {
@@ -19,9 +20,11 @@ class ListenerMessages : ListenerAdapter() {
         if (event.user?.isBot == true) return
         AutoRoleService.onReactionAdd(event)
         VerificationService.onReactionAdd(event)
+        StyxVotingService.onReactionAdd(event)
     }
 
     override fun onMessageReactionRemove(event: MessageReactionRemoveEvent) {
         AutoRoleService.onReactionRemove(event)
+        StyxVotingService.onReactionRemove(event)
     }
 }

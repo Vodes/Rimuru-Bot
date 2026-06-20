@@ -10,6 +10,7 @@ version = "dev"
 
 repositories {
     mavenCentral()
+    maven("https://repo.styx.moe/releases")
 }
 
 dependencies {
@@ -24,6 +25,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.rssreader)
     implementation(libs.unbescape)
+    implementation(libs.styx.db)
+    implementation(libs.anilist.kmp)
+    implementation(libs.jdbc.postgre)
 }
 
 java {

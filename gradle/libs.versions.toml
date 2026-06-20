@@ -6,6 +6,9 @@ kstore = "1.0.0"
 kotlinx-serialization-json = "1.9.0"
 rssreader = "3.6.0"
 unbescape = "1.1.6.RELEASE"
+styx-db = "0.6.2"
+anilist-kmp = "0.0.4"
+postgre = "42.7.7"
 
 [libraries]
 jda = { module = "net.dv8tion:JDA", version.ref = "jda" }
@@ -16,6 +19,9 @@ kstore-file = { module = "io.github.xxfast:kstore-file", version.ref = "kstore" 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 rssreader = { module = "com.apptasticsoftware:rssreader", version.ref = "rssreader" }
 unbescape = { module = "org.unbescape:unbescape", version.ref = "unbescape" }
+styx-db = { module = "moe.styx:styx-db", version.ref = "styx-db" }
+anilist-kmp = { module = "pw.vodes:anilist-kmp", version.ref = "anilist-kmp" }
+jdbc-postgre = { module = "org.postgresql:postgresql", version.ref = "postgre" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.3.0" }

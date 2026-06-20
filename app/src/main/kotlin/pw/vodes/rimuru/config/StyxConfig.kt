@@ -9,5 +9,6 @@ data class StyxConfig(
     val dbPassword: String = "",
     val botDisplayName: String = "",
     val botAvatarUrl: String = "",
-    val botBio: String = ""
+    val botBio: String = "",
+    val styxInstanceURL: String = "",
 )

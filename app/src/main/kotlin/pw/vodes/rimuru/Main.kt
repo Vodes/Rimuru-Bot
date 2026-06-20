@@ -9,6 +9,7 @@ import pw.vodes.rimuru.listeners.*
 import pw.vodes.rimuru.services.logging.MemberLogService
 import pw.vodes.rimuru.services.rss.RssFeedService
 import pw.vodes.rimuru.services.styx.StyxProfileService
+import pw.vodes.rimuru.services.styx.StyxVotingService
 import pw.vodes.rimuru.services.verification.UnverifiedPurgeService
 import pw.vodes.rimuru.services.verification.VerificationService
 
@@ -41,11 +42,13 @@ fun main() {
 
     RssFeedService.start()
     UnverifiedPurgeService.start()
+    StyxVotingService.start()
 
     Runtime.getRuntime().addShutdownHook(Thread {
         MemberLogService.shutdown()
         RssFeedService.shutdown()
         UnverifiedPurgeService.shutdown()
+        StyxVotingService.shutdown()
         VerificationService.shutdown()
         ConfigService.shutdown()
     })

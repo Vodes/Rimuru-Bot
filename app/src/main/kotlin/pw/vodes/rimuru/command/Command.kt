@@ -99,6 +99,7 @@ object CommandCollection {
         commands.add(CommandRss())
         commands.add(CommandClear())
         commands.add(CommandRestart())
+        commands.add(CommandVoting())
     }
 
     fun onInteraction(event: SlashCommandInteractionEvent) {
