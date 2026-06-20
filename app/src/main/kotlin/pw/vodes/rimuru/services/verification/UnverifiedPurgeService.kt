@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import pw.vodes.rimuru.Main
 import pw.vodes.rimuru.config.ConfigService
+import pw.vodes.rimuru.config.GuildConfig
 import pw.vodes.rimuru.services.logging.GuildExceptionLogService
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
@@ -52,7 +53,7 @@ object UnverifiedPurgeService {
 
     fun scheduleFastPurgeForGuildMembers(guild: Guild) {
         val config = ConfigService.getGuildConfigBlocking(guild.idLong)
-        if (config.purgeUnverifiedAfterDays != -1) {
+        if (!config.isVerificationConfigured() || config.purgeUnverifiedAfterDays != -1) {
             return
         }
         guild.members.forEach { scheduleFastPurge(it) }
@@ -97,7 +98,7 @@ object UnverifiedPurgeService {
     private fun scheduleFastPurge(member: Member) {
         val guild = member.guild
         val config = ConfigService.getGuildConfigBlocking(guild.idLong)
-        if (config.purgeUnverifiedAfterDays != -1) {
+        if (!config.isVerificationConfigured() || config.purgeUnverifiedAfterDays != -1) {
             return
         }
 
@@ -118,7 +119,7 @@ object UnverifiedPurgeService {
     private fun runFastPurge(key: MemberKey) {
         val guild = Main.jda.getGuildById(key.guildId) ?: return
         val config = ConfigService.getGuildConfigBlocking(guild.idLong)
-        if (config.purgeUnverifiedAfterDays != -1) {
+        if (!config.isVerificationConfigured() || config.purgeUnverifiedAfterDays != -1) {
             return
         }
 
@@ -147,6 +148,9 @@ object UnverifiedPurgeService {
 
     private fun purgeGuild(guild: Guild) {
         val config = ConfigService.getGuildConfigBlocking(guild.idLong)
+        if (!config.isVerificationConfigured()) {
+            return
+        }
         val roleId = config.verificationRoleId ?: return
         val days = config.purgeUnverifiedAfterDays
         if (days <= 0) {
@@ -179,6 +183,10 @@ object UnverifiedPurgeService {
                         }
                     )
             }
+    }
+
+    private fun GuildConfig.isVerificationConfigured(): Boolean {
+        return verificationRoleId != null && verificationChannelId != null && verificationReactionMessageId != null
     }
 
     private data class MemberKey(val guildId: Long, val userId: Long)
