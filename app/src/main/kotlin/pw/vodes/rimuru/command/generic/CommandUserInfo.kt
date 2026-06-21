@@ -11,6 +11,7 @@ class CommandUserInfo : Command("userinfo", CommandType.EVERYONE, "Show avatar a
 
     override fun createCommand() = slashCommand()
         .addOption(OptionType.USER, "user", "User to inspect", false)
+        .addOption(OptionType.BOOLEAN, "ephemeral", "Set if the message should be ephemeral or not (default: true)", false)
 
     override fun run(event: SlashCommandInteractionEvent) {
         val target = event.getOption("user")?.asUser ?: event.user
@@ -34,6 +35,6 @@ class CommandUserInfo : Command("userinfo", CommandType.EVERYONE, "Show avatar a
         }
         embed.setImage(if (hasDistinctServerAvatar) serverAvatarUrl else mainAvatarUrl)
 
-        event.replyEmbeds(embed.build()).setEphemeral(true).queue()
+        event.replyEmbeds(embed.build()).setEphemeral(event.getOption("ephemeral")?.asBoolean ?: true).queue()
     }
 }
