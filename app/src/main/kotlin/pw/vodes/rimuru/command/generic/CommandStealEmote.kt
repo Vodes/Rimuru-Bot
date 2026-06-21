@@ -37,7 +37,7 @@ class CommandStealEmote : Command("stealemote", CommandType.MOD, "Clone a custom
             return
         }
 
-        event.deferReply(true).queue()
+        event.deferReply(false).queue()
 
         if (messageLink.isNotBlank()) {
             cloneFromMessageLink(event, guild, messageLink, requestedName)
@@ -87,7 +87,12 @@ class CommandStealEmote : Command("stealemote", CommandType.MOD, "Clone a custom
                     return@queue
                 }
 
-                cloneEmoji(event, guild, SimpleEmoji(customEmoji.isAnimated, customEmoji.name, customEmoji.id), requestedName)
+                cloneEmoji(
+                    event,
+                    guild,
+                    SimpleEmoji(customEmoji.isAnimated, customEmoji.name, customEmoji.id),
+                    requestedName
+                )
             },
             {
                 event.hook.editOriginal("Failed to retrieve that message.").queue()
