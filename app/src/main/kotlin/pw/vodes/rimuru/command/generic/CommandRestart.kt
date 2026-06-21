@@ -16,6 +16,11 @@ class CommandRestart : Command("restart", CommandType.ADMIN, "Exit process so co
 
     override fun run(event: SlashCommandInteractionEvent) {
         if (requireGuildContext(event) == null) return
+        val applicationOwnerId = runCatching { event.jda.retrieveApplicationInfo().complete().owner.idLong }.getOrNull()
+        if (applicationOwnerId == null || event.user.idLong != applicationOwnerId) {
+            event.reply("Only the application owner can restart the bot process.").setEphemeral(true).queue()
+            return
+        }
 
         event.reply("Restarting process...").setEphemeral(true).queue {
             thread(start = true, isDaemon = true) {

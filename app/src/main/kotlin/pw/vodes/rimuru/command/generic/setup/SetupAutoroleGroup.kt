@@ -10,6 +10,7 @@ import pw.vodes.rimuru.config.AutoRoleConfig
 import pw.vodes.rimuru.config.ConfigService
 import pw.vodes.rimuru.util.DiscordMessageLinks
 import pw.vodes.rimuru.util.OwnedStringSelectHandler
+import pw.vodes.rimuru.util.RoleSafety
 import pw.vodes.rimuru.util.ScopedInteractionId
 
 object SetupAutoroleGroup : SetupCommandGroupHandler {
@@ -93,6 +94,11 @@ object SetupAutoroleGroup : SetupCommandGroupHandler {
         }
         if (role.guild.idLong != guild.idLong) {
             event.reply("Role must belong to this server.").setEphemeral(true).queue()
+            return null
+        }
+        val rejectionReason = RoleSafety.automaticRoleRejectionReason(role)
+        if (rejectionReason != null) {
+            event.reply(rejectionReason).setEphemeral(true).queue()
             return null
         }
 

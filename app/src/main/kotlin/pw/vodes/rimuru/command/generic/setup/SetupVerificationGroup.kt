@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import pw.vodes.rimuru.config.ConfigService
 import pw.vodes.rimuru.services.verification.UnverifiedPurgeService
 import pw.vodes.rimuru.util.DiscordMessageLinks
+import pw.vodes.rimuru.util.RoleSafety
 
 object SetupVerificationGroup : SetupCommandGroupHandler {
     override fun handle(event: SlashCommandInteractionEvent, guild: Guild, subcommand: String) {
@@ -36,6 +37,11 @@ object SetupVerificationGroup : SetupCommandGroupHandler {
         }
         if (role.isPublicRole) {
             event.reply("Verification role cannot be @everyone.").setEphemeral(true).queue()
+            return
+        }
+        val rejectionReason = RoleSafety.automaticRoleRejectionReason(role)
+        if (rejectionReason != null) {
+            event.reply(rejectionReason).setEphemeral(true).queue()
             return
         }
 

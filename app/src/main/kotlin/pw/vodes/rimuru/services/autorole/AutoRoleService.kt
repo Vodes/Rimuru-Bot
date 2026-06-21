@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent
 import pw.vodes.rimuru.config.AutoRoleConfig
 import pw.vodes.rimuru.config.ConfigService
 import pw.vodes.rimuru.services.logging.GuildExceptionLogService
+import pw.vodes.rimuru.util.RoleSafety
 
 object AutoRoleService {
     fun onReactionAdd(event: MessageReactionAddEvent) {
@@ -19,6 +20,9 @@ object AutoRoleService {
 
         entries.forEach { entry ->
             val role = event.guild.getRoleById(entry.roleId) ?: return@forEach
+            if (!RoleSafety.canAssignAutomatically(role)) {
+                return@forEach
+            }
             event.guild.addRoleToMember(member, role)
                 .reason("Autorole reaction add")
                 .queue(
@@ -46,6 +50,9 @@ object AutoRoleService {
         event.retrieveMember().queue { member ->
             entries.forEach { entry ->
                 val role = event.guild.getRoleById(entry.roleId) ?: return@forEach
+                if (role.isPublicRole || role.isManaged) {
+                    return@forEach
+                }
                 event.guild.removeRoleFromMember(member, role)
                     .reason("Autorole reaction remove")
                     .queue(

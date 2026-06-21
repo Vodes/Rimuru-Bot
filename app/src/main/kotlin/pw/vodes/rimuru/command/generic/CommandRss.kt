@@ -63,6 +63,14 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
             event.replyChoices(emptyList()).queue()
             return
         }
+        val member = event.member ?: run {
+            event.replyChoices(emptyList()).queue()
+            return
+        }
+        if (!hasConfiguredAdminAccess(guild, member)) {
+            event.replyChoices(emptyList()).queue()
+            return
+        }
         AutocompleteChoices.replyMatching(
             event = event,
             entries = guildFeedEntries(guild),

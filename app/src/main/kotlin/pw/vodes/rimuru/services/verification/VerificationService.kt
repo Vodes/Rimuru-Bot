@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.requests.restaction.MessageCreateAction
 import pw.vodes.rimuru.Main
 import pw.vodes.rimuru.config.ConfigService
 import pw.vodes.rimuru.services.logging.GuildExceptionLogService
+import pw.vodes.rimuru.util.RoleSafety
 import java.security.SecureRandom
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
@@ -51,7 +52,7 @@ object VerificationService {
         }
 
         val role = guild.getRoleById(verificationRoleId) ?: return
-        if (role.isPublicRole) {
+        if (!RoleSafety.canAssignAutomatically(role)) {
             return
         }
 
@@ -188,6 +189,11 @@ object VerificationService {
         val member = event.member
         if (role == null || member == null) {
             event.channel.sendMessage("Verification role could not be found. Please contact staff.").queue()
+            (event.guild.getThreadChannelById(session.threadId))?.delete()?.queueAfter(2, TimeUnit.SECONDS)
+            return
+        }
+        if (!RoleSafety.canAssignAutomatically(role)) {
+            event.channel.sendMessage("Verification role is no longer safe for me to assign. Please contact staff.").queue()
             (event.guild.getThreadChannelById(session.threadId))?.delete()?.queueAfter(2, TimeUnit.SECONDS)
             return
         }
