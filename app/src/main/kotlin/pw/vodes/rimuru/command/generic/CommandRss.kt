@@ -39,6 +39,8 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
                 .addOption(OptionType.STRING, "url", "New RSS feed URL", false)
                 .addOptions(channelOption(required = false))
                 .addOption(OptionType.STRING, "regex", "New regex filter", false),
+            SubcommandData("info", "Show details for an RSS feed")
+                .addOption(OptionType.STRING, "feed", "Feed to show", true, true),
             SubcommandData("remove", "Remove an RSS feed"),
             SubcommandData("list", "List configured RSS feeds")
         )
@@ -48,6 +50,7 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
         when (event.subcommandName) {
             "add" -> add(event, guildContext.guild)
             "edit" -> edit(event, guildContext.guild)
+            "info" -> info(event, guildContext.guild)
             "remove" -> openRemoveSelector(event, guildContext.guild)
             "list" -> list(event, guildContext.guild)
             else -> event.reply("Unknown RSS subcommand.").setEphemeral(true).queue()
@@ -55,7 +58,7 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
     }
 
     override fun onAutoComplete(event: CommandAutoCompleteInteractionEvent) {
-        if (event.subcommandName != "edit" || event.focusedOption.name != "feed") {
+        if (event.subcommandName !in setOf("edit", "info") || event.focusedOption.name != "feed") {
             return
         }
 
@@ -88,6 +91,10 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
         private const val REMOVE_MENU_PREFIX = "rss:remove"
         private const val MAX_REMOVE_OPTIONS = 25
         private const val MAX_AUTOCOMPLETE_CHOICES = 25
+        private const val DISCORD_MESSAGE_LIMIT = 2000
+        private const val LIST_NAME_LIMIT = 80
+        private const val LIST_REGEX_LIMIT = 120
+        private const val LIST_URL_LIMIT = 160
 
         private fun channelOption(required: Boolean): OptionData {
             return OptionData(OptionType.CHANNEL, "channel", "Channel to post new entries in", required)
@@ -108,6 +115,35 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
         private fun feedSummary(feed: RssFeed): String {
             val regexSummary = feed.regex.ifBlank { "none" }
             return "`${feed.name}` -> <#${feed.channelId}> | ${feed.url} | regex: `$regexSummary`"
+        }
+
+        private fun feedListSummary(feed: RssFeed): String {
+            val regexSummary = feed.regex.ifBlank { "none" }.truncate(LIST_REGEX_LIMIT)
+            return "`${feed.name.truncate(LIST_NAME_LIMIT)}` -> <#${feed.channelId}> | ${feed.url.truncate(LIST_URL_LIMIT)} | regex: `$regexSummary`"
+        }
+
+        private fun String.truncate(limit: Int): String {
+            return if (length <= limit) this else take(limit - 3) + "..."
+        }
+
+        private fun chunkMessages(prefix: String, lines: List<String>): List<String> {
+            val chunks = mutableListOf<String>()
+            val current = StringBuilder(prefix)
+            for (line in lines) {
+                val separator = if (current.length == prefix.length) "" else "\n"
+                if (current.length + separator.length + line.length > DISCORD_MESSAGE_LIMIT) {
+                    chunks += current.toString()
+                    current.clear()
+                    current.append(prefix)
+                }
+
+                if (current.length > prefix.length) {
+                    current.append('\n')
+                }
+                current.append(line)
+            }
+            chunks += current.toString()
+            return chunks
         }
 
         private object RemoveMenuHandler : OwnedStringSelectHandler(
@@ -220,6 +256,23 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
         RemoveMenuHandler.open(event, guild, entries)
     }
 
+    private fun info(event: SlashCommandInteractionEvent, guild: Guild) {
+        val index = event.getOption("feed")?.asString?.toIntOrNull() ?: run {
+            event.reply("Invalid RSS feed selection.").setEphemeral(true).queue()
+            return
+        }
+
+        val feed = RssFeedService.getFeeds().getOrNull(index)
+        if (feed == null || feed.guildId != guild.idLong) {
+            event.reply("That RSS feed no longer exists in this server.").setEphemeral(true).queue()
+            return
+        }
+
+        event.reply("RSS feed: ${feedSummary(feed)}")
+            .setEphemeral(true)
+            .queue()
+    }
+
     private fun list(event: SlashCommandInteractionEvent, guild: Guild) {
         val entries = guildFeedEntries(guild)
         if (entries.isEmpty()) {
@@ -228,11 +281,18 @@ class CommandRss : Command("rss", CommandType.ADMIN, "Manage RSS feeds") {
         }
 
         val lines = entries.map { entry ->
-            "${entry.index + 1}. ${feedSummary(entry.value)}"
+            "${entry.index + 1}. ${feedListSummary(entry.value)}"
         }
-        event.reply(lines.joinToString(separator = "\n", prefix = "RSS feeds:\n"))
+        val chunks = chunkMessages("RSS feeds:\n", lines)
+        event.reply(chunks.first())
             .setEphemeral(true)
-            .queue()
+            .queue { hook ->
+                chunks.drop(1).forEach { chunk ->
+                    hook.sendMessage(chunk)
+                        .setEphemeral(true)
+                        .queue()
+                }
+            }
     }
 
     private fun resolveChannel(
