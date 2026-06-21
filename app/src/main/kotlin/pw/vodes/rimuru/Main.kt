@@ -2,6 +2,7 @@ package pw.vodes.rimuru
 
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.requests.GatewayIntent
 import pw.vodes.rimuru.command.CommandCollection
 import pw.vodes.rimuru.config.ConfigService
@@ -26,6 +27,7 @@ fun main() {
         .build()
 
     Main.jda.awaitReady()
+    println("Invite link: ${Main.jda.getInviteUrl(Permission.ADMINISTRATOR)}")
     StyxProfileService.applyConfiguredProfiles(Main.jda.guilds)
 
     val commands = CommandCollection.commands.map { it.createCommand() }
