@@ -128,6 +128,7 @@ data class RssFeed(
             .setTitle(title)
             .setUrl(item.getPostUrl())
             .setTimestamp(Instant.ofEpochSecond(item.getUnixPubTime()))
+            .setFooter("RSS notice: this server and linked sites index content; they do not host it")
             .apply {
                 if (isU2 || isNyaa) {
                     setAuthor(
