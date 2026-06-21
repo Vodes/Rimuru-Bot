@@ -65,14 +65,20 @@ object MemberLogService {
     private fun resolveUserLogChannel(guild: Guild): GuildMessageChannel? {
         val channelId = ConfigService.getGuildConfigBlocking(guild.idLong).userLogChannelId ?: return null
         val channel = guild.getChannelById(GuildMessageChannel::class.java, channelId) ?: return null
-        return channel.takeIf { guild.selfMember.hasPermission(channel, Permission.MESSAGE_SEND, Permission.MESSAGE_EMBED_LINKS) }
+        return channel.takeIf {
+            guild.selfMember.hasPermission(
+                channel,
+                Permission.MESSAGE_SEND,
+                Permission.MESSAGE_EMBED_LINKS
+            )
+        }
     }
 
     private fun buildJoinEmbed(user: User): EmbedBuilder {
         val createdEpoch = user.timeCreated.toEpochSecond()
         return baseUserEmbed(user)
             .setAuthor("User joined")
-            .setDescription("${user.asMention}\nCreated:\n<t:$createdEpoch:R> (<t:$createdEpoch:F>)")
+            .setDescription("${user.asMention}\nCreated:\n<t:$createdEpoch:R> (<t:$createdEpoch:d> <t:$createdEpoch:t>)")
     }
 
     private fun buildLeaveEmbed(guild: Guild, user: User): EmbedBuilder {
@@ -109,7 +115,9 @@ object MemberLogService {
                     .firstOrNull { entry ->
                         entry.targetIdLong == userId
                                 && entry.type in setOf(ActionType.KICK, ActionType.BAN)
-                                && entry.timeCreated.isAfter(OffsetDateTime.now().minusSeconds(AUDIT_LOG_LOOKBACK_SECONDS))
+                                && entry.timeCreated.isAfter(
+                            OffsetDateTime.now().minusSeconds(AUDIT_LOG_LOOKBACK_SECONDS)
+                        )
                     }
             }.getOrNull()
         }
